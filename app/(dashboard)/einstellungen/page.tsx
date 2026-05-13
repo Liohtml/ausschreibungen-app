@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Loader2, Check } from "lucide-react";
 
 const BUNDESLAENDER = [
   "Baden-Württemberg",
@@ -104,21 +104,29 @@ export default function EinstellungenPage() {
 
   if (loading) {
     return (
-      <div className="text-center py-12 text-gray-500">Laden...</div>
+      <div className="flex items-center justify-center py-16 text-gray-400">
+        <Loader2 className="w-5 h-5 animate-spin mr-2" />
+        Laden...
+      </div>
     );
   }
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Einstellungen</h1>
+      <h1 className="text-2xl font-bold text-[#1E293B] mb-8">Einstellungen</h1>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Firmenprofil</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      <div className="bg-white border border-gray-100 rounded-xl p-6">
+        <p className="text-lg font-semibold text-[#1E293B] mb-6">
+          Firmenprofil
+        </p>
+        <div className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="firmenname">Firmenname</Label>
+            <Label
+              htmlFor="firmenname"
+              className="text-sm font-medium text-gray-700"
+            >
+              Firmenname
+            </Label>
             <Input
               id="firmenname"
               value={profile.firmenname ?? ""}
@@ -126,46 +134,61 @@ export default function EinstellungenPage() {
                 setProfile((p) => ({ ...p, firmenname: e.target.value }))
               }
               placeholder="Musterfirma GmbH"
+              className="border-gray-200 rounded-lg focus:border-[#3B82F6] focus:ring-0"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="beschreibung">Beschreibung</Label>
+            <Label
+              htmlFor="beschreibung"
+              className="text-sm font-medium text-gray-700"
+            >
+              Beschreibung
+            </Label>
             <Textarea
               id="beschreibung"
               value={beschreibung}
               onChange={(e) => setBeschreibung(e.target.value)}
               placeholder="Kurze Beschreibung Ihres Unternehmens..."
               rows={3}
+              className="border-gray-200 rounded-lg focus:border-[#3B82F6] focus:ring-0 resize-none"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="keywords">Keywords (kommagetrennt)</Label>
+            <Label
+              htmlFor="keywords"
+              className="text-sm font-medium text-gray-700"
+            >
+              Keywords (kommagetrennt)
+            </Label>
             <Input
               id="keywords"
               value={keywordsText}
               onChange={(e) => setKeywordsText(e.target.value)}
               placeholder="Bauarbeiten, Elektroinstallation, Sanitär"
+              className="border-gray-200 rounded-lg focus:border-[#3B82F6] focus:ring-0"
             />
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400">
               Trennen Sie mehrere Suchbegriffe mit Kommas
             </p>
           </div>
 
-          <div className="space-y-2">
-            <Label>Bundesländer</Label>
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-gray-700">
+              Bundesländer
+            </Label>
             <div className="grid grid-cols-2 gap-2">
               {BUNDESLAENDER.map((bl) => (
                 <label
                   key={bl}
-                  className="flex items-center gap-2 text-sm cursor-pointer"
+                  className="flex items-center gap-2.5 text-sm text-gray-600 cursor-pointer py-1 px-2 rounded-lg hover:bg-gray-50 transition-colors duration-150"
                 >
                   <input
                     type="checkbox"
                     checked={selectedBundeslaender.includes(bl)}
                     onChange={() => toggleBundesland(bl)}
-                    className="rounded border-gray-300"
+                    className="rounded border-gray-300 text-[#3B82F6] focus:ring-[#3B82F6]"
                   />
                   {bl}
                 </label>
@@ -175,7 +198,12 @@ export default function EinstellungenPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="plz">PLZ</Label>
+              <Label
+                htmlFor="plz"
+                className="text-sm font-medium text-gray-700"
+              >
+                PLZ
+              </Label>
               <Input
                 id="plz"
                 value={profile.plz ?? ""}
@@ -184,10 +212,16 @@ export default function EinstellungenPage() {
                 }
                 placeholder="60311"
                 maxLength={5}
+                className="border-gray-200 rounded-lg focus:border-[#3B82F6] focus:ring-0"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="radius">Radius (km)</Label>
+              <Label
+                htmlFor="radius"
+                className="text-sm font-medium text-gray-700"
+              >
+                Radius (km)
+              </Label>
               <Input
                 id="radius"
                 type="number"
@@ -199,31 +233,42 @@ export default function EinstellungenPage() {
                   }))
                 }
                 placeholder="50"
+                className="border-gray-200 rounded-lg focus:border-[#3B82F6] focus:ring-0"
               />
             </div>
           </div>
 
           {message && (
-            <p
-              className={`text-sm ${
+            <div
+              className={`flex items-center gap-2 text-sm ${
                 message.startsWith("Fehler")
-                  ? "text-red-600"
+                  ? "text-red-500"
                   : "text-green-600"
               }`}
             >
+              {!message.startsWith("Fehler") && (
+                <Check className="w-4 h-4" />
+              )}
               {message}
-            </p>
+            </div>
           )}
 
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="w-full bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-lg h-11 cursor-pointer transition-colors duration-150"
           >
-            {saving ? "Wird gespeichert..." : "Speichern"}
+            {saving ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                Wird gespeichert...
+              </>
+            ) : (
+              "Speichern"
+            )}
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

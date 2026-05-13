@@ -2,13 +2,12 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createServerSupabase } from "@/lib/supabase/server";
 import type { Ausschreibung, Dokument } from "@/lib/types";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { MerkenButton } from "@/components/merken-button";
+import { ArrowLeft, ExternalLink, FileText } from "lucide-react";
 
 export default async function AusschreibungDetailPage({
   params,
@@ -37,54 +36,83 @@ export default async function AusschreibungDetailPage({
 
   const docs = (dokumente as Dokument[] | null) ?? [];
 
-  const fristAbgelaufen = item.abgabefrist && new Date(item.abgabefrist) < new Date();
+  const fristAbgelaufen =
+    item.abgabefrist && new Date(item.abgabefrist) < new Date();
 
   return (
     <div className="max-w-4xl">
       <Link
         href="/ausschreibungen"
-        className="text-sm text-blue-600 hover:underline mb-4 inline-block"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-[#1E293B] transition-colors duration-150 mb-6 cursor-pointer"
       >
-        &larr; Zurück zur Übersicht
+        <ArrowLeft className="w-4 h-4" />
+        Zurück zur Übersicht
       </Link>
 
       {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-6">
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">{item.titel}</h1>
+          <h1 className="text-2xl font-bold text-[#1E293B]">{item.titel}</h1>
           {item.auftraggeber_name && (
-            <p className="text-gray-600 mt-1 text-lg">{item.auftraggeber_name}</p>
+            <p className="text-lg text-gray-600 mt-1">
+              {item.auftraggeber_name}
+            </p>
           )}
-          <p className="text-gray-500 mt-1">
+          <p className="text-gray-400 mt-1 text-sm">
             {item.auftraggeber_ort || ""}
             {item.auftraggeber_plz ? ` (${item.auftraggeber_plz})` : ""}
-            {item.auftraggeber_bundesland ? ` — ${item.auftraggeber_bundesland}` : ""}
+            {item.auftraggeber_bundesland
+              ? ` — ${item.auftraggeber_bundesland}`
+              : ""}
           </p>
         </div>
         <MerkenButton ausschreibungId={id} />
       </div>
 
       {/* Badges */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {item.auftragsart && <Badge>{item.auftragsart}</Badge>}
-        {item.verfahrensart && <Badge variant="outline">{item.verfahrensart}</Badge>}
+      <div className="flex flex-wrap gap-2 mb-8">
+        {item.auftragsart && (
+          <Badge className="rounded-full text-xs bg-[#3B82F6] text-white border-0">
+            {item.auftragsart}
+          </Badge>
+        )}
+        {item.verfahrensart && (
+          <Badge
+            variant="outline"
+            className="rounded-full text-xs"
+          >
+            {item.verfahrensart}
+          </Badge>
+        )}
         {item.abgabefrist && (
-          <Badge variant={fristAbgelaufen ? "destructive" : "default"}>
+          <Badge
+            variant={fristAbgelaufen ? "destructive" : "secondary"}
+            className="rounded-full text-xs"
+          >
             {fristAbgelaufen ? "Abgelaufen: " : "Frist: "}
             {format(new Date(item.abgabefrist), "dd.MM.yyyy", { locale: de })}
           </Badge>
         )}
         {item.source_portal && (
-          <Badge variant="secondary">{item.source_portal}</Badge>
+          <Badge
+            variant="secondary"
+            className="rounded-full text-xs bg-gray-100 text-gray-600 border-0"
+          >
+            {item.source_portal}
+          </Badge>
         )}
       </div>
 
-      {/* Zur Ausschreibung Button — immer sichtbar */}
+      {/* CTA Button */}
       {item.source_url && (
-        <div className="mb-6">
+        <div className="mb-8">
           <a href={item.source_url} target="_blank" rel="noopener noreferrer">
-            <Button className="w-full sm:w-auto" size="lg">
-              Zur Ausschreibung auf der Originalplattform &rarr;
+            <Button
+              size="lg"
+              className="w-full sm:w-auto bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-lg h-12 px-8 text-sm cursor-pointer transition-colors duration-150"
+            >
+              Zur Originalplattform
+              <ExternalLink className="w-4 h-4 ml-2" />
             </Button>
           </a>
         </div>
@@ -92,179 +120,226 @@ export default async function AusschreibungDetailPage({
 
       {/* KI-Zusammenfassung */}
       {item.ki_zusammenfassung && (
-        <Card className="mb-6 border-blue-200 bg-blue-50">
-          <CardHeader>
-            <CardTitle className="text-base text-blue-800">KI-Zusammenfassung</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-blue-900 whitespace-pre-wrap">{item.ki_zusammenfassung}</p>
-          </CardContent>
-        </Card>
+        <div className="bg-[#3B82F6]/5 border border-[#3B82F6]/10 rounded-xl p-6 mb-6">
+          <p className="text-sm font-medium text-[#3B82F6] mb-2">
+            KI-Zusammenfassung
+          </p>
+          <p className="text-sm text-[#1E293B] whitespace-pre-wrap leading-relaxed">
+            {item.ki_zusammenfassung}
+          </p>
+        </div>
       )}
 
       {/* Details-Grid */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-base">Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
-            {item.auftraggeber_name && (
-              <div>
-                <dt className="font-medium text-gray-500">Auftraggeber</dt>
-                <dd className="text-gray-900">{item.auftraggeber_name}</dd>
-              </div>
-            )}
-            {item.auftraggeber_ort && (
-              <div>
-                <dt className="font-medium text-gray-500">Ort</dt>
-                <dd className="text-gray-900">
-                  {item.auftraggeber_plz ? `${item.auftraggeber_plz} ` : ""}
-                  {item.auftraggeber_ort}
-                </dd>
-              </div>
-            )}
-            {item.auftraggeber_bundesland && (
-              <div>
-                <dt className="font-medium text-gray-500">Bundesland</dt>
-                <dd className="text-gray-900">{item.auftraggeber_bundesland}</dd>
-              </div>
-            )}
-            {item.auftragsart && (
-              <div>
-                <dt className="font-medium text-gray-500">Auftragsart</dt>
-                <dd className="text-gray-900">{item.auftragsart}</dd>
-              </div>
-            )}
-            {item.verfahrensart && (
-              <div>
-                <dt className="font-medium text-gray-500">Verfahrensart</dt>
-                <dd className="text-gray-900">{item.verfahrensart}</dd>
-              </div>
-            )}
-            {item.abgabefrist && (
-              <div>
-                <dt className="font-medium text-gray-500">Abgabefrist</dt>
-                <dd className={fristAbgelaufen ? "text-red-600 font-medium" : "text-gray-900"}>
-                  {format(new Date(item.abgabefrist), "dd.MM.yyyy HH:mm", { locale: de })}
-                  {fristAbgelaufen && " (abgelaufen)"}
-                </dd>
-              </div>
-            )}
-            {item.veroeffentlicht_am && (
-              <div>
-                <dt className="font-medium text-gray-500">Veröffentlicht</dt>
-                <dd className="text-gray-900">
-                  {format(new Date(item.veroeffentlicht_am), "dd.MM.yyyy", { locale: de })}
-                </dd>
-              </div>
-            )}
-            {item.auftragswert_eur && (
-              <div>
-                <dt className="font-medium text-gray-500">Auftragswert</dt>
-                <dd className="text-gray-900">
-                  {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(item.auftragswert_eur)}
-                </dd>
-              </div>
-            )}
-            {item.kontakt_email && (
-              <div>
-                <dt className="font-medium text-gray-500">Kontakt</dt>
-                <dd>
-                  <a href={`mailto:${item.kontakt_email}`} className="text-blue-600 hover:underline">
-                    {item.kontakt_email}
-                  </a>
-                </dd>
-              </div>
-            )}
-            {item.source_portal && (
-              <div>
-                <dt className="font-medium text-gray-500">Quelle</dt>
-                <dd className="text-gray-900">{item.source_portal}</dd>
-              </div>
-            )}
-          </dl>
-
-          {/* CPV-Codes */}
-          {item.cpv_codes && item.cpv_codes.length > 0 && (
-            <div className="mt-4 pt-4 border-t">
-              <p className="text-sm font-medium text-gray-500 mb-2">CPV-Codes</p>
-              <div className="flex flex-wrap gap-1">
-                {item.cpv_codes.map((cpv) => (
-                  <Badge key={cpv} variant="secondary" className="text-xs">{cpv}</Badge>
-                ))}
-              </div>
+      <div className="bg-white border border-gray-100 rounded-xl p-6 mb-6">
+        <p className="text-sm font-semibold text-[#1E293B] mb-5">Details</p>
+        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 text-sm">
+          {item.auftraggeber_name && (
+            <div>
+              <dt className="text-gray-400 mb-0.5">Auftraggeber</dt>
+              <dd className="text-[#1E293B]">{item.auftraggeber_name}</dd>
             </div>
           )}
-        </CardContent>
-      </Card>
+          {item.auftraggeber_ort && (
+            <div>
+              <dt className="text-gray-400 mb-0.5">Ort</dt>
+              <dd className="text-[#1E293B]">
+                {item.auftraggeber_plz ? `${item.auftraggeber_plz} ` : ""}
+                {item.auftraggeber_ort}
+              </dd>
+            </div>
+          )}
+          {item.auftraggeber_bundesland && (
+            <div>
+              <dt className="text-gray-400 mb-0.5">Bundesland</dt>
+              <dd className="text-[#1E293B]">
+                {item.auftraggeber_bundesland}
+              </dd>
+            </div>
+          )}
+          {item.auftragsart && (
+            <div>
+              <dt className="text-gray-400 mb-0.5">Auftragsart</dt>
+              <dd className="text-[#1E293B]">{item.auftragsart}</dd>
+            </div>
+          )}
+          {item.verfahrensart && (
+            <div>
+              <dt className="text-gray-400 mb-0.5">Verfahrensart</dt>
+              <dd className="text-[#1E293B]">{item.verfahrensart}</dd>
+            </div>
+          )}
+          {item.abgabefrist && (
+            <div>
+              <dt className="text-gray-400 mb-0.5">Abgabefrist</dt>
+              <dd
+                className={
+                  fristAbgelaufen
+                    ? "text-red-500 font-medium"
+                    : "text-[#1E293B]"
+                }
+              >
+                {format(new Date(item.abgabefrist), "dd.MM.yyyy HH:mm", {
+                  locale: de,
+                })}
+                {fristAbgelaufen && " (abgelaufen)"}
+              </dd>
+            </div>
+          )}
+          {item.veroeffentlicht_am && (
+            <div>
+              <dt className="text-gray-400 mb-0.5">Veröffentlicht</dt>
+              <dd className="text-[#1E293B]">
+                {format(new Date(item.veroeffentlicht_am), "dd.MM.yyyy", {
+                  locale: de,
+                })}
+              </dd>
+            </div>
+          )}
+          {item.auftragswert_eur && (
+            <div>
+              <dt className="text-gray-400 mb-0.5">Auftragswert</dt>
+              <dd className="text-[#1E293B]">
+                {new Intl.NumberFormat("de-DE", {
+                  style: "currency",
+                  currency: "EUR",
+                }).format(item.auftragswert_eur)}
+              </dd>
+            </div>
+          )}
+          {item.kontakt_email && (
+            <div>
+              <dt className="text-gray-400 mb-0.5">Kontakt</dt>
+              <dd>
+                <a
+                  href={`mailto:${item.kontakt_email}`}
+                  className="text-[#3B82F6] hover:underline cursor-pointer"
+                >
+                  {item.kontakt_email}
+                </a>
+              </dd>
+            </div>
+          )}
+          {item.source_portal && (
+            <div>
+              <dt className="text-gray-400 mb-0.5">Quelle</dt>
+              <dd className="text-[#1E293B]">{item.source_portal}</dd>
+            </div>
+          )}
+        </dl>
+
+        {/* CPV-Codes */}
+        {item.cpv_codes && item.cpv_codes.length > 0 && (
+          <div className="mt-6 pt-5 border-t border-gray-100">
+            <p className="text-gray-400 text-sm mb-2">CPV-Codes</p>
+            <div className="flex flex-wrap gap-1.5">
+              {item.cpv_codes.map((cpv) => (
+                <Badge
+                  key={cpv}
+                  variant="secondary"
+                  className="rounded-full text-xs bg-gray-100 text-gray-600 border-0"
+                >
+                  {cpv}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Beschreibung */}
       {item.beschreibung && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="text-base">Beschreibung</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-700 whitespace-pre-wrap">{item.beschreibung}</p>
-          </CardContent>
-        </Card>
+        <div className="bg-white border border-gray-100 rounded-xl p-6 mb-6">
+          <p className="text-sm font-semibold text-[#1E293B] mb-3">
+            Beschreibung
+          </p>
+          <p className="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">
+            {item.beschreibung}
+          </p>
+        </div>
       )}
 
       {/* Dokumente */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-base">
-            Dokumente {docs.length > 0 ? `(${docs.length})` : ""}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {docs.length > 0 ? (
-            <div className="space-y-2">
-              {docs.map((doc) => (
-                <div key={doc.id} className="flex items-center justify-between p-3 border rounded-md hover:bg-gray-50">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+      <div className="bg-white border border-gray-100 rounded-xl p-6 mb-6">
+        <p className="text-sm font-semibold text-[#1E293B] mb-4">
+          Dokumente {docs.length > 0 ? `(${docs.length})` : ""}
+        </p>
+        {docs.length > 0 ? (
+          <div className="space-y-1">
+            {docs.map((doc) => (
+              <div
+                key={doc.id}
+                className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors duration-150"
+              >
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <FileText className="w-4 h-4 text-gray-400 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-[#1E293B] truncate">
                       {doc.dateiname || "Dokument"}
                     </p>
-                    <div className="flex gap-2 mt-1">
+                    <div className="flex gap-1.5 mt-1">
                       {doc.dateityp && (
-                        <Badge variant="secondary" className="text-xs">{doc.dateityp}</Badge>
+                        <Badge
+                          variant="secondary"
+                          className="rounded-full text-xs bg-gray-100 text-gray-500 border-0"
+                        >
+                          {doc.dateityp}
+                        </Badge>
                       )}
                       {doc.klassifikation && (
-                        <Badge variant="outline" className="text-xs">{doc.klassifikation}</Badge>
+                        <Badge
+                          variant="outline"
+                          className="rounded-full text-xs"
+                        >
+                          {doc.klassifikation}
+                        </Badge>
                       )}
                     </div>
                   </div>
-                  {doc.original_url && (
-                    <a
-                      href={doc.original_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-4 shrink-0"
-                    >
-                      <Button variant="outline" size="sm">Öffnen</Button>
-                    </a>
-                  )}
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-4">
-              <p className="text-sm text-gray-500 mb-3">
-                Keine Dokumente in der Datenbank.
-              </p>
-              {item.source_url && (
-                <a href={item.source_url} target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline">
-                    Dokumente auf der Originalplattform ansehen &rarr;
-                  </Button>
-                </a>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                {doc.original_url && (
+                  <a
+                    href={doc.original_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-4 shrink-0"
+                  >
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-sm text-gray-500 hover:text-[#1E293B] cursor-pointer transition-colors duration-150"
+                    >
+                      Öffnen
+                    </Button>
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-6">
+            <FileText className="w-8 h-8 text-gray-300 mx-auto mb-3" />
+            <p className="text-sm text-gray-500 mb-4">
+              Keine Dokumente in der Datenbank.
+            </p>
+            {item.source_url && (
+              <a
+                href={item.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button
+                  variant="ghost"
+                  className="text-sm text-[#3B82F6] hover:text-[#2563EB] cursor-pointer transition-colors duration-150"
+                >
+                  Dokumente auf der Originalplattform ansehen
+                  <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
+                </Button>
+              </a>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
