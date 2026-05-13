@@ -45,7 +45,7 @@ export default async function AusschreibungDetailPage({
         href="/ausschreibungen"
         className="text-sm text-blue-600 hover:underline mb-4 inline-block"
       >
-        &larr; Zurueck zur Uebersicht
+        &larr; Zurück zur Übersicht
       </Link>
 
       {/* Header */}
@@ -153,7 +153,7 @@ export default async function AusschreibungDetailPage({
             )}
             {item.veroeffentlicht_am && (
               <div>
-                <dt className="font-medium text-gray-500">Veroeffentlicht</dt>
+                <dt className="font-medium text-gray-500">Veröffentlicht</dt>
                 <dd className="text-gray-900">
                   {format(new Date(item.veroeffentlicht_am), "dd.MM.yyyy", { locale: de })}
                 </dd>
@@ -243,7 +243,7 @@ export default async function AusschreibungDetailPage({
                       rel="noopener noreferrer"
                       className="ml-4 shrink-0"
                     >
-                      <Button variant="outline" size="sm">Oeffnen</Button>
+                      <Button variant="outline" size="sm">Öffnen</Button>
                     </a>
                   )}
                 </div>

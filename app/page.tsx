@@ -21,7 +21,7 @@ const features = [
   {
     title: "Konkurrenz-Analyse",
     description:
-      "Sehen Sie, welche Unternehmen sich auf aehnliche Ausschreibungen bewerben. Behalten Sie den Markt im Blick.",
+      "Sehen Sie, welche Unternehmen sich auf ähnliche Ausschreibungen bewerben. Behalten Sie den Markt im Blick.",
   },
 ];
 
@@ -51,7 +51,7 @@ export default function LandingPage() {
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 mb-6">
             Alle deutschen Ausschreibungen.
             <br />
-            Taeglich aktuell.
+            Täglich aktuell.
           </h1>
           <p className="text-xl text-gray-600 mb-8">
             23 Plattformen. KI-Zusammenfassungen. 9,99 EUR/Woche.
@@ -104,7 +104,7 @@ export default function LandingPage() {
                 <span className="text-gray-500"> / Woche</span>
               </div>
               <CardDescription className="mt-4 text-base">
-                7 Tage kostenlos testen. Jederzeit kuendbar.
+                7 Tage kostenlos testen. Jederzeit kündbar.
               </CardDescription>
             </CardHeader>
             <div className="p-6 pt-0">

@@ -22,7 +22,7 @@ import { format } from "date-fns";
 import { de } from "date-fns/locale";
 
 const BUNDESLAENDER = [
-  "Baden-Wuerttemberg",
+  "Baden-Württemberg",
   "Bayern",
   "Berlin",
   "Brandenburg",
@@ -37,7 +37,7 @@ const BUNDESLAENDER = [
   "Sachsen",
   "Sachsen-Anhalt",
   "Schleswig-Holstein",
-  "Thueringen",
+  "Thüringen",
 ];
 
 const AUFTRAGSARTEN = [
@@ -128,7 +128,7 @@ export default function AusschreibungenPage() {
             <SelectValue placeholder="Bundesland" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Alle Bundeslaender</SelectItem>
+            <SelectItem value="all">Alle Bundesländer</SelectItem>
             {BUNDESLAENDER.map((bl) => (
               <SelectItem key={bl} value={bl}>
                 {bl}
@@ -238,7 +238,7 @@ export default function AusschreibungenPage() {
             disabled={page === 0}
             onClick={() => setPage((p) => p - 1)}
           >
-            Zurueck
+            Zurück
           </Button>
           <span className="text-sm text-gray-600">
             Seite {page + 1} von {totalPages}

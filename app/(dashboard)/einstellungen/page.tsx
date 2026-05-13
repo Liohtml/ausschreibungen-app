@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 const BUNDESLAENDER = [
-  "Baden-Wuerttemberg",
+  "Baden-Württemberg",
   "Bayern",
   "Berlin",
   "Brandenburg",
@@ -25,7 +25,7 @@ const BUNDESLAENDER = [
   "Sachsen",
   "Sachsen-Anhalt",
   "Schleswig-Holstein",
-  "Thueringen",
+  "Thüringen",
 ];
 
 export default function EinstellungenPage() {
@@ -146,7 +146,7 @@ export default function EinstellungenPage() {
               id="keywords"
               value={keywordsText}
               onChange={(e) => setKeywordsText(e.target.value)}
-              placeholder="Bauarbeiten, Elektroinstallation, Sanitaer"
+              placeholder="Bauarbeiten, Elektroinstallation, Sanitär"
             />
             <p className="text-xs text-gray-500">
               Trennen Sie mehrere Suchbegriffe mit Kommas
@@ -154,7 +154,7 @@ export default function EinstellungenPage() {
           </div>
 
           <div className="space-y-2">
-            <Label>Bundeslaender</Label>
+            <Label>Bundesländer</Label>
             <div className="grid grid-cols-2 gap-2">
               {BUNDESLAENDER.map((bl) => (
                 <label
