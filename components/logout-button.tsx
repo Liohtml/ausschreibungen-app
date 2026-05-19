@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 
 export function LogoutButton() {
   const router = useRouter();
@@ -19,8 +20,9 @@ export function LogoutButton() {
       variant="ghost"
       size="sm"
       onClick={handleLogout}
-      className="w-full text-gray-400 hover:text-white hover:bg-gray-800"
+      className="w-full justify-start gap-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl cursor-pointer transition-all duration-200"
     >
+      <LogOut className="w-4 h-4" />
       Abmelden
     </Button>
   );

@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, ChevronRight, SlidersHorizontal } from "lucide-react";
 
 const BUNDESLAENDER = [
   "Baden-Württemberg",
@@ -99,62 +99,73 @@ export default function AusschreibungenPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-[#1E293B] mb-8">
-        Ausschreibungen
-      </h1>
+      <div className="mb-8">
+        <h1 className="text-2xl font-heading font-bold text-[#1E293B]">
+          Ausschreibungen
+        </h1>
+        <p className="text-sm text-gray-400 mt-1">
+          Durchsuchen Sie alle verfügbaren Ausschreibungen.
+        </p>
+      </div>
 
       {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-3 mb-6">
-        <div className="relative md:max-w-sm flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <Input
-            placeholder="Suche nach Titel..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
+      <div className="bg-white border border-gray-100/80 rounded-2xl p-4 mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <SlidersHorizontal className="w-4 h-4 text-gray-400" />
+          <span className="text-sm font-medium text-gray-500">Filter</span>
+        </div>
+        <div className="flex flex-col md:flex-row gap-3">
+          <div className="relative md:max-w-sm flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+            <Input
+              placeholder="Suche nach Titel..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(0);
+              }}
+              className="pl-10 border-gray-200 rounded-xl focus:border-[#3B82F6] focus:ring-0 bg-gray-50/50"
+            />
+          </div>
+          <Select
+            value={bundesland}
+            onValueChange={(val) => {
+              setBundesland(!val || val === "all" ? "" : val);
               setPage(0);
             }}
-            className="pl-10 border-gray-200 rounded-lg focus:border-[#3B82F6] focus:ring-0"
-          />
+          >
+            <SelectTrigger className="md:w-52 border-gray-200 rounded-xl bg-gray-50/50">
+              <SelectValue placeholder="Bundesland" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle Bundesländer</SelectItem>
+              {BUNDESLAENDER.map((bl) => (
+                <SelectItem key={bl} value={bl}>
+                  {bl}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={auftragsart}
+            onValueChange={(val) => {
+              setAuftragsart(!val || val === "all" ? "" : val);
+              setPage(0);
+            }}
+          >
+            <SelectTrigger className="md:w-52 border-gray-200 rounded-xl bg-gray-50/50">
+              <SelectValue placeholder="Auftragsart" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle Auftragsarten</SelectItem>
+              {AUFTRAGSARTEN.map((art) => (
+                <SelectItem key={art} value={art}>
+                  {art}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <Select
-          value={bundesland}
-          onValueChange={(val) => {
-            setBundesland(!val || val === "all" ? "" : val);
-            setPage(0);
-          }}
-        >
-          <SelectTrigger className="md:w-52 border-gray-200 rounded-lg">
-            <SelectValue placeholder="Bundesland" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Alle Bundesländer</SelectItem>
-            {BUNDESLAENDER.map((bl) => (
-              <SelectItem key={bl} value={bl}>
-                {bl}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select
-          value={auftragsart}
-          onValueChange={(val) => {
-            setAuftragsart(!val || val === "all" ? "" : val);
-            setPage(0);
-          }}
-        >
-          <SelectTrigger className="md:w-52 border-gray-200 rounded-lg">
-            <SelectValue placeholder="Auftragsart" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Alle Auftragsarten</SelectItem>
-            {AUFTRAGSARTEN.map((art) => (
-              <SelectItem key={art} value={art}>
-                {art}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       {/* Results count */}
@@ -164,49 +175,55 @@ export default function AusschreibungenPage() {
 
       {/* Results */}
       {loading ? (
-        <div className="flex items-center justify-center py-16 text-gray-400">
+        <div className="flex items-center justify-center py-20 text-gray-400">
           <Loader2 className="w-5 h-5 animate-spin mr-2" />
           Laden...
         </div>
       ) : results.length === 0 ? (
-        <div className="bg-white border border-gray-100 rounded-xl p-8 text-center text-gray-500">
-          Keine Ausschreibungen gefunden.
+        <div className="bg-white border border-gray-100/80 rounded-2xl p-10 text-center">
+          <Search className="w-10 h-10 text-gray-200 mx-auto mb-4" />
+          <p className="text-gray-500">Keine Ausschreibungen gefunden.</p>
+          <p className="text-sm text-gray-400 mt-1">
+            Versuchen Sie andere Suchbegriffe oder Filter.
+          </p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="bg-white border border-gray-100/80 rounded-2xl divide-y divide-gray-50 overflow-hidden">
           {results.map((item) => (
             <div
               key={item.id}
-              className="bg-white border border-gray-100 rounded-xl px-5 py-4 hover:border-blue-200 transition-colors duration-150 cursor-pointer"
+              className="px-6 py-4 hover:bg-gray-50/50 transition-colors duration-200 cursor-pointer flex items-center gap-4"
               onClick={() => router.push(`/ausschreibungen/${item.id}`)}
             >
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium text-[#1E293B]">{item.titel}</p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {item.auftraggeber_name}
-                    {item.auftraggeber_ort
-                      ? ` — ${item.auftraggeber_ort}`
-                      : ""}
-                    {item.auftraggeber_bundesland
-                      ? ` (${item.auftraggeber_bundesland})`
-                      : ""}
-                  </p>
-                  {item.cpv_codes && item.cpv_codes.length > 0 && (
-                    <div className="flex gap-1.5 mt-2 flex-wrap">
-                      {item.cpv_codes.slice(0, 3).map((cpv) => (
-                        <Badge
-                          key={cpv}
-                          variant="secondary"
-                          className="rounded-full text-xs bg-gray-100 text-gray-600 border-0"
-                        >
-                          {cpv}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className="shrink-0 text-right">
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-[#1E293B] text-sm">
+                  {item.titel}
+                </p>
+                <p className="text-sm text-gray-400 mt-1">
+                  {item.auftraggeber_name}
+                  {item.auftraggeber_ort
+                    ? ` — ${item.auftraggeber_ort}`
+                    : ""}
+                  {item.auftraggeber_bundesland
+                    ? ` (${item.auftraggeber_bundesland})`
+                    : ""}
+                </p>
+                {item.cpv_codes && item.cpv_codes.length > 0 && (
+                  <div className="flex gap-1.5 mt-2 flex-wrap">
+                    {item.cpv_codes.slice(0, 3).map((cpv) => (
+                      <Badge
+                        key={cpv}
+                        variant="secondary"
+                        className="rounded-full text-xs bg-gray-50 text-gray-500 border-0"
+                      >
+                        {cpv}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="shrink-0 flex items-center gap-2">
+                <div className="text-right">
                   {item.abgabefrist && (
                     <Badge
                       variant={
@@ -214,7 +231,7 @@ export default function AusschreibungenPage() {
                           ? "destructive"
                           : "outline"
                       }
-                      className="rounded-full text-xs"
+                      className="rounded-full text-xs border-gray-200"
                     >
                       {format(new Date(item.abgabefrist), "dd.MM.yyyy", {
                         locale: de,
@@ -227,6 +244,7 @@ export default function AusschreibungenPage() {
                     </p>
                   )}
                 </div>
+                <ChevronRight className="w-4 h-4 text-gray-300" />
               </div>
             </div>
           ))}
@@ -237,11 +255,11 @@ export default function AusschreibungenPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-4 mt-8">
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             disabled={page === 0}
             onClick={() => setPage((p) => p - 1)}
-            className="text-sm text-gray-500 hover:text-[#1E293B] cursor-pointer transition-colors duration-150"
+            className="text-sm rounded-xl border-gray-200 cursor-pointer transition-colors duration-200"
           >
             Zurück
           </Button>
@@ -249,11 +267,11 @@ export default function AusschreibungenPage() {
             {page + 1} / {totalPages}
           </span>
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             disabled={page >= totalPages - 1}
             onClick={() => setPage((p) => p + 1)}
-            className="text-sm text-gray-500 hover:text-[#1E293B] cursor-pointer transition-colors duration-150"
+            className="text-sm rounded-xl border-gray-200 cursor-pointer transition-colors duration-200"
           >
             Weiter
           </Button>

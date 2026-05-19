@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { MerkenButton } from "@/components/merken-button";
-import { ArrowLeft, ExternalLink, FileText } from "lucide-react";
+import { ArrowLeft, ExternalLink, FileText, Sparkles } from "lucide-react";
 
 export default async function AusschreibungDetailPage({
   params,
@@ -43,7 +43,7 @@ export default async function AusschreibungDetailPage({
     <div className="max-w-4xl">
       <Link
         href="/ausschreibungen"
-        className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-[#1E293B] transition-colors duration-150 mb-6 cursor-pointer"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-[#1E293B] transition-colors duration-200 mb-6 cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" />
         Zurück zur Übersicht
@@ -52,9 +52,11 @@ export default async function AusschreibungDetailPage({
       {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-6">
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-[#1E293B]">{item.titel}</h1>
+          <h1 className="text-2xl font-heading font-bold text-[#1E293B]">
+            {item.titel}
+          </h1>
           {item.auftraggeber_name && (
-            <p className="text-lg text-gray-600 mt-1">
+            <p className="text-lg text-gray-500 mt-1">
               {item.auftraggeber_name}
             </p>
           )}
@@ -79,7 +81,7 @@ export default async function AusschreibungDetailPage({
         {item.verfahrensart && (
           <Badge
             variant="outline"
-            className="rounded-full text-xs"
+            className="rounded-full text-xs border-gray-200"
           >
             {item.verfahrensart}
           </Badge>
@@ -96,7 +98,7 @@ export default async function AusschreibungDetailPage({
         {item.source_portal && (
           <Badge
             variant="secondary"
-            className="rounded-full text-xs bg-gray-100 text-gray-600 border-0"
+            className="rounded-full text-xs bg-gray-50 text-gray-500 border-0"
           >
             {item.source_portal}
           </Badge>
@@ -107,10 +109,7 @@ export default async function AusschreibungDetailPage({
       {item.source_url && (
         <div className="mb-8">
           <a href={item.source_url} target="_blank" rel="noopener noreferrer">
-            <Button
-              size="lg"
-              className="w-full sm:w-auto bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-lg h-12 px-8 text-sm cursor-pointer transition-colors duration-150"
-            >
+            <Button className="w-full sm:w-auto bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl h-12 px-8 text-sm font-medium cursor-pointer transition-all duration-200 shadow-sm shadow-blue-500/10">
               Zur Originalplattform
               <ExternalLink className="w-4 h-4 ml-2" />
             </Button>
@@ -120,10 +119,15 @@ export default async function AusschreibungDetailPage({
 
       {/* KI-Zusammenfassung */}
       {item.ki_zusammenfassung && (
-        <div className="bg-[#3B82F6]/5 border border-[#3B82F6]/10 rounded-xl p-6 mb-6">
-          <p className="text-sm font-medium text-[#3B82F6] mb-2">
-            KI-Zusammenfassung
-          </p>
+        <div className="bg-gradient-to-br from-blue-50/80 to-blue-50/30 border border-blue-100/60 rounded-2xl p-6 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-7 h-7 rounded-lg bg-[#3B82F6]/10 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-[#3B82F6]" />
+            </div>
+            <p className="text-sm font-semibold text-[#3B82F6]">
+              KI-Zusammenfassung
+            </p>
+          </div>
           <p className="text-sm text-[#1E293B] whitespace-pre-wrap leading-relaxed">
             {item.ki_zusammenfassung}
           </p>
@@ -131,8 +135,10 @@ export default async function AusschreibungDetailPage({
       )}
 
       {/* Details-Grid */}
-      <div className="bg-white border border-gray-100 rounded-xl p-6 mb-6">
-        <p className="text-sm font-semibold text-[#1E293B] mb-5">Details</p>
+      <div className="bg-white border border-gray-100/80 rounded-2xl p-6 mb-6">
+        <p className="text-sm font-heading font-semibold text-[#1E293B] mb-5">
+          Details
+        </p>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 text-sm">
           {item.auftraggeber_name && (
             <div>
@@ -199,7 +205,7 @@ export default async function AusschreibungDetailPage({
           {item.auftragswert_eur && (
             <div>
               <dt className="text-gray-400 mb-0.5">Auftragswert</dt>
-              <dd className="text-[#1E293B]">
+              <dd className="text-[#1E293B] font-medium">
                 {new Intl.NumberFormat("de-DE", {
                   style: "currency",
                   currency: "EUR",
@@ -230,14 +236,14 @@ export default async function AusschreibungDetailPage({
 
         {/* CPV-Codes */}
         {item.cpv_codes && item.cpv_codes.length > 0 && (
-          <div className="mt-6 pt-5 border-t border-gray-100">
+          <div className="mt-6 pt-5 border-t border-gray-100/80">
             <p className="text-gray-400 text-sm mb-2">CPV-Codes</p>
             <div className="flex flex-wrap gap-1.5">
               {item.cpv_codes.map((cpv) => (
                 <Badge
                   key={cpv}
                   variant="secondary"
-                  className="rounded-full text-xs bg-gray-100 text-gray-600 border-0"
+                  className="rounded-full text-xs bg-gray-50 text-gray-500 border-0"
                 >
                   {cpv}
                 </Badge>
@@ -249,8 +255,8 @@ export default async function AusschreibungDetailPage({
 
       {/* Beschreibung */}
       {item.beschreibung && (
-        <div className="bg-white border border-gray-100 rounded-xl p-6 mb-6">
-          <p className="text-sm font-semibold text-[#1E293B] mb-3">
+        <div className="bg-white border border-gray-100/80 rounded-2xl p-6 mb-6">
+          <p className="text-sm font-heading font-semibold text-[#1E293B] mb-3">
             Beschreibung
           </p>
           <p className="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">
@@ -260,8 +266,8 @@ export default async function AusschreibungDetailPage({
       )}
 
       {/* Dokumente */}
-      <div className="bg-white border border-gray-100 rounded-xl p-6 mb-6">
-        <p className="text-sm font-semibold text-[#1E293B] mb-4">
+      <div className="bg-white border border-gray-100/80 rounded-2xl p-6 mb-6">
+        <p className="text-sm font-heading font-semibold text-[#1E293B] mb-4">
           Dokumente {docs.length > 0 ? `(${docs.length})` : ""}
         </p>
         {docs.length > 0 ? (
@@ -269,10 +275,12 @@ export default async function AusschreibungDetailPage({
             {docs.map((doc) => (
               <div
                 key={doc.id}
-                className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors duration-150"
+                className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors duration-200"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <FileText className="w-4 h-4 text-gray-400 shrink-0" />
+                  <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0">
+                    <FileText className="w-4 h-4 text-gray-400" />
+                  </div>
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-[#1E293B] truncate">
                       {doc.dateiname || "Dokument"}
@@ -281,7 +289,7 @@ export default async function AusschreibungDetailPage({
                       {doc.dateityp && (
                         <Badge
                           variant="secondary"
-                          className="rounded-full text-xs bg-gray-100 text-gray-500 border-0"
+                          className="rounded-full text-xs bg-gray-50 text-gray-500 border-0"
                         >
                           {doc.dateityp}
                         </Badge>
@@ -289,7 +297,7 @@ export default async function AusschreibungDetailPage({
                       {doc.klassifikation && (
                         <Badge
                           variant="outline"
-                          className="rounded-full text-xs"
+                          className="rounded-full text-xs border-gray-200"
                         >
                           {doc.klassifikation}
                         </Badge>
@@ -307,7 +315,7 @@ export default async function AusschreibungDetailPage({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-sm text-gray-500 hover:text-[#1E293B] cursor-pointer transition-colors duration-150"
+                      className="text-sm text-gray-400 hover:text-[#3B82F6] cursor-pointer transition-colors duration-200"
                     >
                       Öffnen
                     </Button>
@@ -317,8 +325,10 @@ export default async function AusschreibungDetailPage({
             ))}
           </div>
         ) : (
-          <div className="text-center py-6">
-            <FileText className="w-8 h-8 text-gray-300 mx-auto mb-3" />
+          <div className="text-center py-8">
+            <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center mx-auto mb-3">
+              <FileText className="w-6 h-6 text-gray-300" />
+            </div>
             <p className="text-sm text-gray-500 mb-4">
               Keine Dokumente in der Datenbank.
             </p>
@@ -330,7 +340,7 @@ export default async function AusschreibungDetailPage({
               >
                 <Button
                   variant="ghost"
-                  className="text-sm text-[#3B82F6] hover:text-[#2563EB] cursor-pointer transition-colors duration-150"
+                  className="text-sm text-[#3B82F6] hover:text-[#2563EB] cursor-pointer transition-colors duration-200"
                 >
                   Dokumente auf der Originalplattform ansehen
                   <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
