@@ -1,16 +1,23 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Poppins, Open_Sans } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const poppins = Poppins({
+  variable: "--font-heading",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const openSans = Open_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
   title: "Ausschreibungen Deutschland",
   description:
-    "Alle deutschen Ausschreibungen. Taeglich aktuell. KI-Zusammenfassungen.",
+    "Ausschreibungen im Umkreis schnell und einfach gefunden. 23 Plattformen, KI-Zusammenfassungen, täglich aktuell.",
 };
 
 export default function RootLayout({
@@ -19,7 +26,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="de" className={`${inter.variable} h-full antialiased`}>
+    <html
+      lang="de"
+      className={`${poppins.variable} ${openSans.variable} h-full antialiased`}
+    >
       <body className="min-h-full flex flex-col font-sans">{children}</body>
     </html>
   );
