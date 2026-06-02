@@ -2,8 +2,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createServerSupabase } from "@/lib/supabase/server";
 import type { Ausschreibung, Dokument } from "@/lib/types";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { MerkenButton } from "@/components/merken-button";
@@ -23,9 +21,7 @@ export default async function AusschreibungDetailPage({
     .eq("id", id)
     .single();
 
-  if (!ausschreibung) {
-    notFound();
-  }
+  if (!ausschreibung) notFound();
 
   const item = ausschreibung as Ausschreibung;
 
@@ -35,218 +31,164 @@ export default async function AusschreibungDetailPage({
     .eq("ausschreibung_id", id);
 
   const docs = (dokumente as Dokument[] | null) ?? [];
-
-  const fristAbgelaufen =
-    item.abgabefrist && new Date(item.abgabefrist) < new Date();
+  const fristAbgelaufen = item.abgabefrist && new Date(item.abgabefrist) < new Date();
 
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-3xl">
+      {/* Back */}
       <Link
         href="/ausschreibungen"
-        className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-[#1E293B] transition-colors duration-200 mb-6 cursor-pointer"
+        className="inline-flex items-center gap-1.5 text-[12px] font-mono text-zinc-400 hover:text-zinc-700 transition-colors duration-150 mb-6"
       >
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-3.5 h-3.5" />
         Zurück zur Übersicht
       </Link>
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-6">
-        <div className="flex-1">
-          <h1 className="text-2xl font-heading font-bold text-[#1E293B]">
+      <div className="flex items-start justify-between gap-6 mb-6">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-[22px] font-black text-zinc-950 tracking-tight leading-tight mb-1">
             {item.titel}
           </h1>
           {item.auftraggeber_name && (
-            <p className="text-lg text-gray-500 mt-1">
-              {item.auftraggeber_name}
+            <p className="text-[14px] text-zinc-500">{item.auftraggeber_name}</p>
+          )}
+          {(item.auftraggeber_ort || item.auftraggeber_bundesland) && (
+            <p className="text-[13px] text-zinc-400 mt-0.5">
+              {[item.auftraggeber_plz, item.auftraggeber_ort, item.auftraggeber_bundesland]
+                .filter(Boolean)
+                .join(" · ")}
             </p>
           )}
-          <p className="text-gray-400 mt-1 text-sm">
-            {item.auftraggeber_ort || ""}
-            {item.auftraggeber_plz ? ` (${item.auftraggeber_plz})` : ""}
-            {item.auftraggeber_bundesland
-              ? ` — ${item.auftraggeber_bundesland}`
-              : ""}
-          </p>
         </div>
         <MerkenButton ausschreibungId={id} />
       </div>
 
-      {/* Badges */}
-      <div className="flex flex-wrap gap-2 mb-8">
+      {/* Meta pills */}
+      <div className="flex flex-wrap gap-1.5 mb-6">
         {item.auftragsart && (
-          <Badge className="rounded-full text-xs bg-[#3B82F6] text-white border-0">
+          <span className="text-[10px] font-mono font-medium px-2.5 py-1 rounded bg-zinc-900 text-white">
             {item.auftragsart}
-          </Badge>
+          </span>
         )}
         {item.verfahrensart && (
-          <Badge
-            variant="outline"
-            className="rounded-full text-xs border-gray-200"
-          >
+          <span className="text-[10px] font-mono font-medium px-2.5 py-1 rounded border border-zinc-200 text-zinc-600">
             {item.verfahrensart}
-          </Badge>
+          </span>
         )}
         {item.abgabefrist && (
-          <Badge
-            variant={fristAbgelaufen ? "destructive" : "secondary"}
-            className="rounded-full text-xs"
-          >
+          <span className={`text-[10px] font-mono font-medium px-2.5 py-1 rounded border ${
+            fristAbgelaufen
+              ? "border-red-200 bg-red-50 text-red-600"
+              : "border-zinc-200 text-zinc-600"
+          }`}>
             {fristAbgelaufen ? "Abgelaufen: " : "Frist: "}
             {format(new Date(item.abgabefrist), "dd.MM.yyyy", { locale: de })}
-          </Badge>
+          </span>
         )}
         {item.source_portal && (
-          <Badge
-            variant="secondary"
-            className="rounded-full text-xs bg-gray-50 text-gray-500 border-0"
-          >
+          <span className="text-[10px] font-mono font-medium px-2.5 py-1 rounded border border-zinc-100 bg-zinc-50 text-zinc-400">
             {item.source_portal}
-          </Badge>
+          </span>
         )}
       </div>
 
-      {/* CTA Button */}
+      {/* CTA */}
       {item.source_url && (
         <div className="mb-8">
           <a href={item.source_url} target="_blank" rel="noopener noreferrer">
-            <Button className="w-full sm:w-auto bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl h-12 px-8 text-sm font-medium cursor-pointer transition-all duration-200 shadow-sm shadow-blue-500/10">
+            <button className="inline-flex items-center gap-2 text-sm font-semibold bg-zinc-900 text-white px-5 py-2.5 rounded-md hover:bg-zinc-800 transition-colors duration-150">
               Zur Originalplattform
-              <ExternalLink className="w-4 h-4 ml-2" />
-            </Button>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </button>
           </a>
         </div>
       )}
 
       {/* KI-Zusammenfassung */}
       {item.ki_zusammenfassung && (
-        <div className="bg-gradient-to-br from-blue-50/80 to-blue-50/30 border border-blue-100/60 rounded-2xl p-6 mb-6">
+        <div className="border border-zinc-200 rounded-lg p-5 mb-5 bg-white">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-7 h-7 rounded-lg bg-[#3B82F6]/10 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-[#3B82F6]" />
-            </div>
-            <p className="text-sm font-semibold text-[#3B82F6]">
+            <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
+            <p className="text-[10px] font-mono font-medium uppercase tracking-[0.12em] text-zinc-400">
               KI-Zusammenfassung
             </p>
           </div>
-          <p className="text-sm text-[#1E293B] whitespace-pre-wrap leading-relaxed">
+          <p className="text-[13px] text-zinc-700 whitespace-pre-wrap leading-relaxed">
             {item.ki_zusammenfassung}
           </p>
         </div>
       )}
 
-      {/* Details-Grid */}
-      <div className="bg-white border border-gray-100/80 rounded-2xl p-6 mb-6">
-        <p className="text-sm font-heading font-semibold text-[#1E293B] mb-5">
-          Details
-        </p>
-        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 text-sm">
-          {item.auftraggeber_name && (
-            <div>
-              <dt className="text-gray-400 mb-0.5">Auftraggeber</dt>
-              <dd className="text-[#1E293B]">{item.auftraggeber_name}</dd>
-            </div>
-          )}
-          {item.auftraggeber_ort && (
-            <div>
-              <dt className="text-gray-400 mb-0.5">Ort</dt>
-              <dd className="text-[#1E293B]">
-                {item.auftraggeber_plz ? `${item.auftraggeber_plz} ` : ""}
-                {item.auftraggeber_ort}
-              </dd>
-            </div>
-          )}
-          {item.auftraggeber_bundesland && (
-            <div>
-              <dt className="text-gray-400 mb-0.5">Bundesland</dt>
-              <dd className="text-[#1E293B]">
-                {item.auftraggeber_bundesland}
-              </dd>
-            </div>
-          )}
-          {item.auftragsart && (
-            <div>
-              <dt className="text-gray-400 mb-0.5">Auftragsart</dt>
-              <dd className="text-[#1E293B]">{item.auftragsart}</dd>
-            </div>
-          )}
-          {item.verfahrensart && (
-            <div>
-              <dt className="text-gray-400 mb-0.5">Verfahrensart</dt>
-              <dd className="text-[#1E293B]">{item.verfahrensart}</dd>
-            </div>
-          )}
-          {item.abgabefrist && (
-            <div>
-              <dt className="text-gray-400 mb-0.5">Abgabefrist</dt>
-              <dd
-                className={
-                  fristAbgelaufen
-                    ? "text-red-500 font-medium"
-                    : "text-[#1E293B]"
-                }
-              >
-                {format(new Date(item.abgabefrist), "dd.MM.yyyy HH:mm", {
-                  locale: de,
-                })}
-                {fristAbgelaufen && " (abgelaufen)"}
-              </dd>
-            </div>
-          )}
-          {item.veroeffentlicht_am && (
-            <div>
-              <dt className="text-gray-400 mb-0.5">Veröffentlicht</dt>
-              <dd className="text-[#1E293B]">
-                {format(new Date(item.veroeffentlicht_am), "dd.MM.yyyy", {
-                  locale: de,
-                })}
-              </dd>
-            </div>
-          )}
-          {item.auftragswert_eur && (
-            <div>
-              <dt className="text-gray-400 mb-0.5">Auftragswert</dt>
-              <dd className="text-[#1E293B] font-medium">
-                {new Intl.NumberFormat("de-DE", {
-                  style: "currency",
-                  currency: "EUR",
-                }).format(item.auftragswert_eur)}
-              </dd>
-            </div>
-          )}
+      {/* Details */}
+      <div className="border border-zinc-200 rounded-lg overflow-hidden mb-5 bg-white">
+        <div className="px-5 py-3.5 border-b border-zinc-100 bg-zinc-50/80">
+          <p className="text-[10px] font-mono font-medium uppercase tracking-[0.12em] text-zinc-400">
+            Details
+          </p>
+        </div>
+        <dl className="grid grid-cols-1 sm:grid-cols-2 divide-y divide-zinc-50 sm:divide-y-0">
+          {[
+            item.auftraggeber_name && { label: "Auftraggeber", value: item.auftraggeber_name },
+            item.auftraggeber_ort && {
+              label: "Ort",
+              value: `${item.auftraggeber_plz ? item.auftraggeber_plz + " " : ""}${item.auftraggeber_ort}`,
+            },
+            item.auftraggeber_bundesland && { label: "Bundesland", value: item.auftraggeber_bundesland },
+            item.auftragsart && { label: "Auftragsart", value: item.auftragsart },
+            item.verfahrensart && { label: "Verfahrensart", value: item.verfahrensart },
+            item.abgabefrist && {
+              label: "Abgabefrist",
+              value: format(new Date(item.abgabefrist), "dd.MM.yyyy HH:mm", { locale: de }) + (fristAbgelaufen ? " (abgelaufen)" : ""),
+              className: fristAbgelaufen ? "text-red-600" : undefined,
+            },
+            item.veroeffentlicht_am && {
+              label: "Veröffentlicht",
+              value: format(new Date(item.veroeffentlicht_am), "dd.MM.yyyy", { locale: de }),
+            },
+            item.auftragswert_eur && {
+              label: "Auftragswert",
+              value: new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(item.auftragswert_eur),
+            },
+            item.source_portal && { label: "Quelle", value: item.source_portal },
+          ]
+            .filter(Boolean)
+            .map((field, i) => {
+              const f = field as { label: string; value: string; className?: string };
+              return (
+                <div key={i} className={`px-5 py-3.5 ${i % 2 === 0 ? "sm:border-r sm:border-zinc-50" : ""} border-b border-zinc-50 last:border-b-0`}>
+                  <dt className="text-[10px] font-mono uppercase tracking-[0.1em] text-zinc-400 mb-1">
+                    {f.label}
+                  </dt>
+                  <dd className={`text-[13px] font-medium text-zinc-800 ${f.className ?? ""}`}>
+                    {f.value}
+                  </dd>
+                </div>
+              );
+            })}
+
+          {/* Kontakt */}
           {item.kontakt_email && (
-            <div>
-              <dt className="text-gray-400 mb-0.5">Kontakt</dt>
+            <div className="px-5 py-3.5 border-b border-zinc-50 last:border-b-0">
+              <dt className="text-[10px] font-mono uppercase tracking-[0.1em] text-zinc-400 mb-1">Kontakt</dt>
               <dd>
-                <a
-                  href={`mailto:${item.kontakt_email}`}
-                  className="text-[#3B82F6] hover:underline cursor-pointer"
-                >
+                <a href={`mailto:${item.kontakt_email}`} className="text-[13px] font-medium text-zinc-800 underline underline-offset-2 hover:text-zinc-600">
                   {item.kontakt_email}
                 </a>
               </dd>
-            </div>
-          )}
-          {item.source_portal && (
-            <div>
-              <dt className="text-gray-400 mb-0.5">Quelle</dt>
-              <dd className="text-[#1E293B]">{item.source_portal}</dd>
             </div>
           )}
         </dl>
 
         {/* CPV-Codes */}
         {item.cpv_codes && item.cpv_codes.length > 0 && (
-          <div className="mt-6 pt-5 border-t border-gray-100/80">
-            <p className="text-gray-400 text-sm mb-2">CPV-Codes</p>
+          <div className="px-5 py-3.5 border-t border-zinc-100">
+            <p className="text-[10px] font-mono uppercase tracking-[0.1em] text-zinc-400 mb-2">CPV-Codes</p>
             <div className="flex flex-wrap gap-1.5">
               {item.cpv_codes.map((cpv) => (
-                <Badge
-                  key={cpv}
-                  variant="secondary"
-                  className="rounded-full text-xs bg-gray-50 text-gray-500 border-0"
-                >
+                <span key={cpv} className="text-[10px] font-mono px-2 py-0.5 rounded border border-zinc-100 bg-zinc-50 text-zinc-500">
                   {cpv}
-                </Badge>
+                </span>
               ))}
             </div>
           </div>
@@ -255,52 +197,45 @@ export default async function AusschreibungDetailPage({
 
       {/* Beschreibung */}
       {item.beschreibung && (
-        <div className="bg-white border border-gray-100/80 rounded-2xl p-6 mb-6">
-          <p className="text-sm font-heading font-semibold text-[#1E293B] mb-3">
-            Beschreibung
-          </p>
-          <p className="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">
-            {item.beschreibung}
-          </p>
+        <div className="border border-zinc-200 rounded-lg overflow-hidden mb-5 bg-white">
+          <div className="px-5 py-3.5 border-b border-zinc-100 bg-zinc-50/80">
+            <p className="text-[10px] font-mono font-medium uppercase tracking-[0.12em] text-zinc-400">Beschreibung</p>
+          </div>
+          <div className="px-5 py-4">
+            <p className="text-[13px] text-zinc-600 whitespace-pre-wrap leading-relaxed">
+              {item.beschreibung}
+            </p>
+          </div>
         </div>
       )}
 
       {/* Dokumente */}
-      <div className="bg-white border border-gray-100/80 rounded-2xl p-6 mb-6">
-        <p className="text-sm font-heading font-semibold text-[#1E293B] mb-4">
-          Dokumente {docs.length > 0 ? `(${docs.length})` : ""}
-        </p>
+      <div className="border border-zinc-200 rounded-lg overflow-hidden bg-white">
+        <div className="px-5 py-3.5 border-b border-zinc-100 bg-zinc-50/80 flex items-center justify-between">
+          <p className="text-[10px] font-mono font-medium uppercase tracking-[0.12em] text-zinc-400">Dokumente</p>
+          {docs.length > 0 && (
+            <span className="text-[10px] font-mono text-zinc-400">{docs.length}</span>
+          )}
+        </div>
         {docs.length > 0 ? (
-          <div className="space-y-1">
-            {docs.map((doc) => (
+          <div>
+            {docs.map((doc, i) => (
               <div
                 key={doc.id}
-                className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors duration-200"
+                className={`flex items-center justify-between px-5 py-3.5 ${i < docs.length - 1 ? "border-b border-zinc-50" : ""} hover:bg-zinc-50/80 transition-colors duration-100`}
               >
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0">
-                    <FileText className="w-4 h-4 text-gray-400" />
-                  </div>
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <FileText className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-[#1E293B] truncate">
+                    <p className="text-[13px] font-medium text-zinc-800 truncate">
                       {doc.dateiname || "Dokument"}
                     </p>
-                    <div className="flex gap-1.5 mt-1">
+                    <div className="flex gap-1.5 mt-0.5">
                       {doc.dateityp && (
-                        <Badge
-                          variant="secondary"
-                          className="rounded-full text-xs bg-gray-50 text-gray-500 border-0"
-                        >
-                          {doc.dateityp}
-                        </Badge>
+                        <span className="text-[10px] font-mono text-zinc-400">{doc.dateityp}</span>
                       )}
                       {doc.klassifikation && (
-                        <Badge
-                          variant="outline"
-                          className="rounded-full text-xs border-gray-200"
-                        >
-                          {doc.klassifikation}
-                        </Badge>
+                        <span className="text-[10px] font-mono text-zinc-400">· {doc.klassifikation}</span>
                       )}
                     </div>
                   </div>
@@ -310,41 +245,26 @@ export default async function AusschreibungDetailPage({
                     href={doc.original_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="ml-4 shrink-0"
+                    className="ml-4 text-[12px] font-medium text-zinc-500 hover:text-zinc-900 transition-colors duration-150 shrink-0"
                   >
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-sm text-gray-400 hover:text-[#3B82F6] cursor-pointer transition-colors duration-200"
-                    >
-                      Öffnen
-                    </Button>
+                    Öffnen
                   </a>
                 )}
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-8">
-            <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center mx-auto mb-3">
-              <FileText className="w-6 h-6 text-gray-300" />
-            </div>
-            <p className="text-sm text-gray-500 mb-4">
-              Keine Dokumente in der Datenbank.
-            </p>
+          <div className="px-5 py-10 text-center">
+            <p className="text-[13px] text-zinc-400 mb-3">Keine Dokumente in der Datenbank.</p>
             {item.source_url && (
               <a
                 href={item.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-[12px] font-medium text-zinc-600 hover:text-zinc-900 underline underline-offset-2 transition-colors duration-150"
               >
-                <Button
-                  variant="ghost"
-                  className="text-sm text-[#3B82F6] hover:text-[#2563EB] cursor-pointer transition-colors duration-200"
-                >
-                  Dokumente auf der Originalplattform ansehen
-                  <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
-                </Button>
+                Auf der Originalplattform ansehen
+                <ExternalLink className="w-3 h-3" />
               </a>
             )}
           </div>

@@ -3,48 +3,31 @@
 import { useState, useEffect } from "react";
 import { createBrowserSupabase } from "@/lib/supabase/client";
 import type { UserProfile } from "@/lib/types";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Check, Building2, MapPin, Tag } from "lucide-react";
+import { Loader2, Check } from "lucide-react";
 
 const BUNDESLAENDER = [
-  "Baden-Württemberg",
-  "Bayern",
-  "Berlin",
-  "Brandenburg",
-  "Bremen",
-  "Hamburg",
-  "Hessen",
-  "Mecklenburg-Vorpommern",
-  "Niedersachsen",
-  "Nordrhein-Westfalen",
-  "Rheinland-Pfalz",
-  "Saarland",
-  "Sachsen",
-  "Sachsen-Anhalt",
-  "Schleswig-Holstein",
-  "Thüringen",
+  "Baden-Württemberg", "Bayern", "Berlin", "Brandenburg", "Bremen",
+  "Hamburg", "Hessen", "Mecklenburg-Vorpommern", "Niedersachsen",
+  "Nordrhein-Westfalen", "Rheinland-Pfalz", "Saarland", "Sachsen",
+  "Sachsen-Anhalt", "Schleswig-Holstein", "Thüringen",
 ];
 
 export default function EinstellungenPage() {
   const [profile, setProfile] = useState<Partial<UserProfile>>({});
   const [keywordsText, setKeywordsText] = useState("");
   const [beschreibung, setBeschreibung] = useState("");
-  const [selectedBundeslaender, setSelectedBundeslaender] = useState<string[]>(
-    []
-  );
+  const [selectedBundeslaender, setSelectedBundeslaender] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
 
   useEffect(() => {
     const load = async () => {
       const supabase = createBrowserSupabase();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       const { data } = await supabase
@@ -57,6 +40,7 @@ export default function EinstellungenPage() {
         const p = data as UserProfile;
         setProfile(p);
         setKeywordsText(p.keywords?.join(", ") ?? "");
+        setBeschreibung(p.beschreibung ?? "");
         setSelectedBundeslaender(p.bundeslaender ?? []);
       }
       setLoading(false);
@@ -69,30 +53,25 @@ export default function EinstellungenPage() {
     setMessage(null);
 
     const supabase = createBrowserSupabase();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const keywords = keywordsText
-      .split(",")
-      .map((k) => k.trim())
-      .filter(Boolean);
+    const keywords = keywordsText.split(",").map((k) => k.trim()).filter(Boolean);
 
     const { error } = await supabase.from("user_profiles").upsert({
       id: user.id,
       firmenname: profile.firmenname ?? null,
+      beschreibung: beschreibung || null,
       keywords,
       bundeslaender: selectedBundeslaender,
       plz: profile.plz ?? null,
       radius_km: profile.radius_km ?? null,
     });
 
-    if (error) {
-      setMessage("Fehler beim Speichern: " + error.message);
-    } else {
-      setMessage("Einstellungen gespeichert.");
-    }
+    setMessage(error
+      ? { text: "Fehler: " + error.message, error: true }
+      : { text: "Einstellungen gespeichert.", error: false }
+    );
     setSaving(false);
   };
 
@@ -104,59 +83,47 @@ export default function EinstellungenPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-gray-400">
-        <Loader2 className="w-5 h-5 animate-spin mr-2" />
-        Laden...
+      <div className="flex items-center justify-center py-20 text-zinc-400">
+        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+        <span className="text-[13px]">Laden...</span>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl">
-      <div className="mb-8">
-        <h1 className="text-2xl font-heading font-bold text-[#1E293B]">
+    <div className="max-w-xl">
+      <div className="mb-6">
+        <h1 className="text-[22px] font-black text-zinc-950 tracking-tight leading-none">
           Einstellungen
         </h1>
-        <p className="text-sm text-gray-400 mt-1">
-          Konfigurieren Sie Ihr Profil und Suchkriterien.
+        <p className="text-[13px] text-zinc-400 mt-1.5">
+          Profil und Suchkriterien konfigurieren.
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-px">
         {/* Firmenprofil */}
-        <div className="bg-white border border-gray-100/80 rounded-2xl p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center">
-              <Building2 className="w-4 h-4 text-[#3B82F6]" />
-            </div>
-            <p className="text-base font-heading font-semibold text-[#1E293B]">
+        <section className="border border-zinc-200 rounded-t-lg bg-white overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-zinc-100 bg-zinc-50/80">
+            <p className="text-[10px] font-mono font-medium uppercase tracking-[0.12em] text-zinc-400">
               Firmenprofil
             </p>
           </div>
-          <div className="space-y-5">
-            <div className="space-y-2">
-              <Label
-                htmlFor="firmenname"
-                className="text-sm font-medium text-gray-600"
-              >
+          <div className="p-5 space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="firmenname" className="text-[12px] font-medium text-zinc-600">
                 Firmenname
               </Label>
               <Input
                 id="firmenname"
                 value={profile.firmenname ?? ""}
-                onChange={(e) =>
-                  setProfile((p) => ({ ...p, firmenname: e.target.value }))
-                }
+                onChange={(e) => setProfile((p) => ({ ...p, firmenname: e.target.value }))}
                 placeholder="Musterfirma GmbH"
-                className="border-gray-200 rounded-xl focus:border-[#3B82F6] focus:ring-0 bg-gray-50/50"
+                className="h-9 text-[13px] border-zinc-200 rounded-md bg-white focus-visible:ring-1 focus-visible:ring-zinc-900 focus-visible:border-zinc-900"
               />
             </div>
-
-            <div className="space-y-2">
-              <Label
-                htmlFor="beschreibung"
-                className="text-sm font-medium text-gray-600"
-              >
+            <div className="space-y-1.5">
+              <Label htmlFor="beschreibung" className="text-[12px] font-medium text-zinc-600">
                 Beschreibung
               </Label>
               <Textarea
@@ -165,153 +132,127 @@ export default function EinstellungenPage() {
                 onChange={(e) => setBeschreibung(e.target.value)}
                 placeholder="Kurze Beschreibung Ihres Unternehmens..."
                 rows={3}
-                className="border-gray-200 rounded-xl focus:border-[#3B82F6] focus:ring-0 resize-none bg-gray-50/50"
+                className="text-[13px] border-zinc-200 rounded-md bg-white focus-visible:ring-1 focus-visible:ring-zinc-900 focus-visible:border-zinc-900 resize-none"
               />
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Suchkriterien */}
-        <div className="bg-white border border-gray-100/80 rounded-2xl p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center">
-              <Tag className="w-4 h-4 text-[#3B82F6]" />
-            </div>
-            <p className="text-base font-heading font-semibold text-[#1E293B]">
+        <section className="border border-zinc-200 border-t-0 bg-white overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-zinc-100 bg-zinc-50/80">
+            <p className="text-[10px] font-mono font-medium uppercase tracking-[0.12em] text-zinc-400">
               Suchkriterien
             </p>
           </div>
-          <div className="space-y-5">
-            <div className="space-y-2">
-              <Label
-                htmlFor="keywords"
-                className="text-sm font-medium text-gray-600"
-              >
-                Keywords (kommagetrennt)
+          <div className="p-5 space-y-5">
+            <div className="space-y-1.5">
+              <Label htmlFor="keywords" className="text-[12px] font-medium text-zinc-600">
+                Keywords
               </Label>
               <Input
                 id="keywords"
                 value={keywordsText}
                 onChange={(e) => setKeywordsText(e.target.value)}
                 placeholder="Bauarbeiten, Elektroinstallation, Sanitär"
-                className="border-gray-200 rounded-xl focus:border-[#3B82F6] focus:ring-0 bg-gray-50/50"
+                className="h-9 text-[13px] border-zinc-200 rounded-md bg-white focus-visible:ring-1 focus-visible:ring-zinc-900 focus-visible:border-zinc-900"
               />
-              <p className="text-xs text-gray-400">
-                Trennen Sie mehrere Suchbegriffe mit Kommas
-              </p>
+              <p className="text-[11px] text-zinc-400">Kommagetrennte Suchbegriffe</p>
             </div>
 
-            <div className="space-y-3">
-              <Label className="text-sm font-medium text-gray-600">
-                Bundesländer
-              </Label>
-              <div className="grid grid-cols-2 gap-1.5">
-                {BUNDESLAENDER.map((bl) => (
-                  <label
-                    key={bl}
-                    className={`flex items-center gap-2.5 text-sm cursor-pointer py-2 px-3 rounded-xl transition-all duration-200 ${
-                      selectedBundeslaender.includes(bl)
-                        ? "bg-blue-50 text-[#3B82F6]"
-                        : "text-gray-600 hover:bg-gray-50"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedBundeslaender.includes(bl)}
-                      onChange={() => toggleBundesland(bl)}
-                      className="rounded border-gray-300 text-[#3B82F6] focus:ring-[#3B82F6]"
-                    />
-                    {bl}
-                  </label>
-                ))}
+            <div className="space-y-2">
+              <p className="text-[12px] font-medium text-zinc-600">Bundesländer</p>
+              <div className="grid grid-cols-2 gap-1">
+                {BUNDESLAENDER.map((bl) => {
+                  const active = selectedBundeslaender.includes(bl);
+                  return (
+                    <label
+                      key={bl}
+                      className={`flex items-center gap-2.5 text-[12px] cursor-pointer py-2 px-3 rounded-md transition-colors duration-100 ${
+                        active
+                          ? "bg-zinc-900 text-white"
+                          : "text-zinc-600 hover:bg-zinc-50"
+                      }`}
+                    >
+                      <div className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0 ${
+                        active ? "border-white bg-white" : "border-zinc-300"
+                      }`}>
+                        {active && <Check className="w-2.5 h-2.5 text-zinc-900" />}
+                      </div>
+                      {bl}
+                    </label>
+                  );
+                })}
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Standort */}
-        <div className="bg-white border border-gray-100/80 rounded-2xl p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center">
-              <MapPin className="w-4 h-4 text-[#3B82F6]" />
-            </div>
-            <p className="text-base font-heading font-semibold text-[#1E293B]">
+        <section className="border border-zinc-200 border-t-0 rounded-b-lg bg-white overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-zinc-100 bg-zinc-50/80">
+            <p className="text-[10px] font-mono font-medium uppercase tracking-[0.12em] text-zinc-400">
               Standort & Umkreis
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label
-                htmlFor="plz"
-                className="text-sm font-medium text-gray-600"
-              >
-                PLZ
-              </Label>
-              <Input
-                id="plz"
-                value={profile.plz ?? ""}
-                onChange={(e) =>
-                  setProfile((p) => ({ ...p, plz: e.target.value }))
-                }
-                placeholder="60311"
-                maxLength={5}
-                className="border-gray-200 rounded-xl focus:border-[#3B82F6] focus:ring-0 bg-gray-50/50"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label
-                htmlFor="radius"
-                className="text-sm font-medium text-gray-600"
-              >
-                Radius (km)
-              </Label>
-              <Input
-                id="radius"
-                type="number"
-                value={profile.radius_km ?? ""}
-                onChange={(e) =>
-                  setProfile((p) => ({
+          <div className="p-5">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="plz" className="text-[12px] font-medium text-zinc-600">PLZ</Label>
+                <Input
+                  id="plz"
+                  value={profile.plz ?? ""}
+                  onChange={(e) => setProfile((p) => ({ ...p, plz: e.target.value }))}
+                  placeholder="60311"
+                  maxLength={5}
+                  className="h-9 text-[13px] border-zinc-200 rounded-md bg-white focus-visible:ring-1 focus-visible:ring-zinc-900 focus-visible:border-zinc-900"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="radius" className="text-[12px] font-medium text-zinc-600">Radius (km)</Label>
+                <Input
+                  id="radius"
+                  type="number"
+                  value={profile.radius_km ?? ""}
+                  onChange={(e) => setProfile((p) => ({
                     ...p,
                     radius_km: e.target.value ? Number(e.target.value) : null,
-                  }))
-                }
-                placeholder="50"
-                className="border-gray-200 rounded-xl focus:border-[#3B82F6] focus:ring-0 bg-gray-50/50"
-              />
+                  }))}
+                  placeholder="50"
+                  className="h-9 text-[13px] border-zinc-200 rounded-md bg-white focus-visible:ring-1 focus-visible:ring-zinc-900 focus-visible:border-zinc-900"
+                />
+              </div>
             </div>
           </div>
-        </div>
+        </section>
+      </div>
 
-        {/* Save */}
+      {/* Save */}
+      <div className="mt-4 space-y-3">
         {message && (
-          <div
-            className={`flex items-center gap-2 text-sm px-4 py-3 rounded-xl ${
-              message.startsWith("Fehler")
-                ? "text-red-600 bg-red-50"
-                : "text-emerald-600 bg-emerald-50"
-            }`}
-          >
-            {!message.startsWith("Fehler") && (
-              <Check className="w-4 h-4" />
-            )}
-            {message}
+          <div className={`flex items-center gap-2 text-[12px] px-4 py-2.5 rounded-md border ${
+            message.error
+              ? "text-red-600 bg-red-50 border-red-200"
+              : "text-emerald-700 bg-emerald-50 border-emerald-200"
+          }`}>
+            {!message.error && <Check className="w-3.5 h-3.5" />}
+            {message.text}
           </div>
         )}
-
-        <Button
+        <button
           onClick={handleSave}
           disabled={saving}
-          className="w-full bg-[#1E293B] hover:bg-[#0F172A] text-white rounded-xl h-12 font-medium cursor-pointer transition-colors duration-200"
+          className="w-full flex items-center justify-center gap-2 text-sm font-semibold bg-zinc-900 text-white h-9 rounded-md hover:bg-zinc-800 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {saving ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
               Wird gespeichert...
             </>
           ) : (
             "Einstellungen speichern"
           )}
-        </Button>
+        </button>
       </div>
     </div>
   );

@@ -1,24 +1,38 @@
 import { createServerSupabase } from "@/lib/supabase/server";
-import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import type { MatchResult } from "@/lib/types";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
-import {
-  FileText,
-  Clock,
-  TrendingUp,
-  ArrowUpRight,
-  ChevronRight,
-} from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+
+function ScorePill({ score }: { score: number }) {
+  if (score >= 85)
+    return (
+      <span className="inline-flex items-center text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+        {score}%
+      </span>
+    );
+  if (score >= 70)
+    return (
+      <span className="inline-flex items-center text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
+        {score}%
+      </span>
+    );
+  return (
+    <span className="inline-flex items-center text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200">
+      {score}%
+    </span>
+  );
+}
 
 export default async function DashboardPage() {
   const supabase = await createServerSupabase();
 
-  // Fetch stats
   const today = new Date().toISOString().split("T")[0];
+  const threeDaysFromNow = new Date();
+  threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
 
-  const [{ count: todayCount }, { count: totalCount }, { data: matches }] =
+  const [{ count: todayCount }, { count: totalCount }, { data: matches }, { count: expiringCount }] =
     await Promise.all([
       supabase
         .from("ausschreibungen")
@@ -31,111 +45,80 @@ export default async function DashboardPage() {
       supabase
         .rpc("match_ausschreibungen", {})
         .then((res) => ({
-          data: (res.data as MatchResult[] | null)?.slice(0, 5) ?? [],
+          data: (res.data as MatchResult[] | null)?.slice(0, 8) ?? [],
         }))
         .then(null, () => ({ data: [] as MatchResult[] })),
+      supabase
+        .from("ausschreibungen")
+        .select("*", { count: "exact", head: true })
+        .gte("abgabefrist", today)
+        .lte("abgabefrist", threeDaysFromNow.toISOString().split("T")[0]),
     ]);
 
-  // Count expiring soon (next 3 days)
-  const threeDaysFromNow = new Date();
-  threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
-  const { count: expiringCount } = await supabase
-    .from("ausschreibungen")
-    .select("*", { count: "exact", head: true })
-    .gte("abgabefrist", today)
-    .lte("abgabefrist", threeDaysFromNow.toISOString().split("T")[0]);
-
   const stats = [
-    {
-      label: "Neue heute",
-      value: todayCount ?? 0,
-      icon: FileText,
-      color: "text-[#3B82F6]",
-      bg: "bg-blue-50",
-    },
-    {
-      label: "Aktive gesamt",
-      value: totalCount ?? 0,
-      icon: TrendingUp,
-      color: "text-emerald-500",
-      bg: "bg-emerald-50",
-    },
-    {
-      label: "Frist in 3 Tagen",
-      value: expiringCount ?? 0,
-      icon: Clock,
-      color: "text-amber-500",
-      bg: "bg-amber-50",
-    },
+    { label: "Neue heute", value: todayCount ?? 0 },
+    { label: "Aktive gesamt", value: totalCount ?? 0 },
+    { label: "Frist in 3 Tagen", value: expiringCount ?? 0 },
   ];
 
   return (
     <div>
+      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-heading font-bold text-[#1E293B]">
+          <h1 className="text-[22px] font-black text-zinc-950 tracking-tight leading-none">
             Dashboard
           </h1>
-          <p className="text-sm text-gray-400 mt-1">
-            Willkommen zurück. Hier ist Ihr Überblick.
+          <p className="text-[13px] text-zinc-400 mt-1.5">
+            Willkommen zurück. Ihr aktueller Überblick.
           </p>
         </div>
         <Link
           href="/ausschreibungen"
-          className="inline-flex items-center gap-1.5 text-sm text-[#3B82F6] hover:text-[#2563EB] font-medium transition-colors duration-200 cursor-pointer"
+          className="inline-flex items-center gap-1 text-[13px] font-medium text-zinc-500 hover:text-zinc-900 transition-colors duration-150"
         >
           Alle Ausschreibungen
-          <ArrowUpRight className="w-4 h-4" />
+          <ArrowUpRight className="w-3.5 h-3.5" />
         </Link>
       </div>
 
       {/* Stats */}
-      <div className="grid md:grid-cols-3 gap-4 mb-10">
+      <div className="grid grid-cols-3 gap-px bg-zinc-200 border border-zinc-200 rounded-lg overflow-hidden mb-8">
         {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="bg-white border border-gray-100/80 rounded-2xl p-6 hover:shadow-sm transition-shadow duration-200"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div
-                className={`w-10 h-10 rounded-xl ${stat.bg} flex items-center justify-center`}
-              >
-                <stat.icon className={`w-5 h-5 ${stat.color}`} />
-              </div>
-            </div>
-            <p className="text-3xl font-heading font-bold text-[#1E293B]">
+          <div key={stat.label} className="bg-white px-6 py-5">
+            <div className="text-[32px] font-black text-zinc-950 tracking-tighter leading-none">
               {stat.value}
-            </p>
-            <p className="text-sm text-gray-400 mt-1">{stat.label}</p>
+            </div>
+            <div className="text-[10px] font-mono uppercase tracking-[0.12em] text-zinc-400 mt-2">
+              {stat.label}
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Latest matches */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-heading font-semibold text-[#1E293B]">
+      {/* Matches */}
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-[13px] font-semibold text-zinc-900 tracking-tight">
           Neueste Treffer
         </h2>
         {matches.length > 0 && (
           <Link
             href="/ausschreibungen"
-            className="text-sm text-gray-400 hover:text-[#1E293B] transition-colors duration-200 cursor-pointer"
+            className="text-[12px] text-zinc-400 hover:text-zinc-700 transition-colors duration-150"
           >
             Alle anzeigen
           </Link>
         )}
       </div>
+
       {matches.length === 0 ? (
-        <div className="bg-white border border-gray-100/80 rounded-2xl p-10 text-center">
-          <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center mx-auto mb-4">
-            <FileText className="w-6 h-6 text-gray-300" />
-          </div>
-          <p className="text-gray-500 mb-1">Noch keine Treffer.</p>
-          <p className="text-sm text-gray-400">
+        <div className="border border-zinc-200 rounded-lg p-10 text-center bg-white">
+          <p className="text-[13px] text-zinc-500">Noch keine Treffer.</p>
+          <p className="text-[12px] text-zinc-400 mt-1">
             Konfigurieren Sie Ihre Suchkriterien in den{" "}
             <Link
               href="/einstellungen"
-              className="text-[#3B82F6] hover:underline cursor-pointer"
+              className="text-zinc-700 hover:text-zinc-900 underline underline-offset-2"
             >
               Einstellungen
             </Link>
@@ -143,39 +126,48 @@ export default async function DashboardPage() {
           </p>
         </div>
       ) : (
-        <div className="bg-white border border-gray-100/80 rounded-2xl divide-y divide-gray-50 overflow-hidden">
+        <div className="border border-zinc-200 rounded-lg overflow-hidden bg-white">
+          {/* Table head */}
+          <div className="grid grid-cols-[1fr_160px_96px_72px] gap-4 px-6 py-2.5 border-b border-zinc-100 bg-zinc-50/80">
+            <span className="text-[9px] font-mono font-medium uppercase tracking-[0.14em] text-zinc-400">
+              Titel
+            </span>
+            <span className="text-[9px] font-mono font-medium uppercase tracking-[0.14em] text-zinc-400">
+              Auftraggeber
+            </span>
+            <span className="text-[9px] font-mono font-medium uppercase tracking-[0.14em] text-zinc-400">
+              Abgabe
+            </span>
+            <span className="text-[9px] font-mono font-medium uppercase tracking-[0.14em] text-zinc-400 text-right">
+              Score
+            </span>
+          </div>
+          {/* Rows */}
           {matches.map((match) => (
             <Link key={match.id} href={`/ausschreibungen/${match.id}`}>
-              <div className="px-6 py-4 hover:bg-gray-50/50 transition-colors duration-200 cursor-pointer flex items-center justify-between gap-4">
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium text-[#1E293B] truncate text-sm">
+              <div className="grid grid-cols-[1fr_160px_96px_72px] gap-4 px-6 py-3.5 border-b border-zinc-50 hover:bg-zinc-50/80 transition-colors duration-100 items-center">
+                <div className="min-w-0">
+                  <p className="text-[13px] font-semibold text-zinc-900 truncate tracking-tight">
                     {match.titel}
                   </p>
-                  <p className="text-sm text-gray-400 mt-0.5">
-                    {match.auftraggeber_name}
-                    {match.auftraggeber_ort
-                      ? ` — ${match.auftraggeber_ort}`
-                      : ""}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <Badge
-                    variant="secondary"
-                    className="rounded-full text-xs bg-blue-50 text-[#3B82F6] border-0 font-medium"
-                  >
-                    {Math.round(match.relevanz_score * 100)}%
-                  </Badge>
-                  {match.abgabefrist && (
-                    <Badge
-                      variant="outline"
-                      className="rounded-full text-xs text-gray-400 border-gray-200"
-                    >
-                      {format(new Date(match.abgabefrist), "dd.MM.yyyy", {
-                        locale: de,
-                      })}
-                    </Badge>
+                  {match.auftraggeber_ort && (
+                    <p className="text-[11px] text-zinc-400 mt-0.5">
+                      {match.auftraggeber_ort}
+                    </p>
                   )}
-                  <ChevronRight className="w-4 h-4 text-gray-300" />
+                </div>
+                <p className="text-[12px] text-zinc-500 truncate">
+                  {match.auftraggeber_name ?? "-"}
+                </p>
+                <p className="text-[11px] font-mono text-zinc-400">
+                  {match.abgabefrist
+                    ? format(new Date(match.abgabefrist), "dd.MM.yyyy", {
+                        locale: de,
+                      })
+                    : "-"}
+                </p>
+                <div className="flex justify-end">
+                  <ScorePill score={Math.round(match.relevanz_score * 100)} />
                 </div>
               </div>
             </Link>

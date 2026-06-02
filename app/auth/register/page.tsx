@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
@@ -40,29 +39,34 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] px-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <Link
-            href="/"
-            className="text-lg font-semibold text-[#1E293B] cursor-pointer"
-          >
+    <div className="min-h-screen flex flex-col bg-zinc-50">
+      {/* Nav */}
+      <header className="border-b border-zinc-200 bg-white">
+        <div className="max-w-[1400px] mx-auto px-8 h-[60px] flex items-center">
+          <Link href="/" className="text-sm font-bold text-zinc-900 tracking-tight">
             Ausschreibungen.de
           </Link>
         </div>
-        <div className="bg-white border border-gray-100 rounded-2xl p-8">
-          <h1 className="text-2xl font-bold text-[#1E293B] text-center mb-2">
-            Konto erstellen
-          </h1>
-          <p className="text-sm text-gray-500 text-center mb-8">
-            Starten Sie mit 7 Tagen kostenlosem Test
-          </p>
-          <form onSubmit={handleRegister} className="space-y-5">
-            <div className="space-y-2">
-              <Label
-                htmlFor="email"
-                className="text-sm font-medium text-gray-700"
-              >
+      </header>
+
+      {/* Form */}
+      <div className="flex-1 flex items-center justify-center px-4 py-16">
+        <div className="w-full max-w-[360px]">
+          <div className="mb-8">
+            <h1 className="text-[28px] font-black text-zinc-950 tracking-tight leading-none mb-2">
+              Konto erstellen
+            </h1>
+            <p className="text-[13px] text-zinc-400">
+              7 Tage kostenlos testen. Bereits ein Konto?{" "}
+              <Link href="/auth/login" className="text-zinc-700 font-medium hover:text-zinc-900 underline underline-offset-2">
+                Anmelden
+              </Link>
+            </p>
+          </div>
+
+          <form onSubmit={handleRegister} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-[12px] font-medium text-zinc-600">
                 E-Mail
               </Label>
               <Input
@@ -72,14 +76,11 @@ export default function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="border-gray-200 rounded-lg focus:border-[#3B82F6] focus:ring-0"
+                className="h-9 text-[13px] border-zinc-200 rounded-md bg-white focus-visible:ring-1 focus-visible:ring-zinc-900 focus-visible:border-zinc-900"
               />
             </div>
-            <div className="space-y-2">
-              <Label
-                htmlFor="password"
-                className="text-sm font-medium text-gray-700"
-              >
+            <div className="space-y-1.5">
+              <Label htmlFor="password" className="text-[12px] font-medium text-zinc-600">
                 Passwort
               </Label>
               <Input
@@ -90,34 +91,38 @@ export default function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="border-gray-200 rounded-lg focus:border-[#3B82F6] focus:ring-0"
+                className="h-9 text-[13px] border-zinc-200 rounded-md bg-white focus-visible:ring-1 focus-visible:ring-zinc-900 focus-visible:border-zinc-900"
               />
             </div>
-            {error && <p className="text-sm text-red-500">{error}</p>}
-            <Button
+
+            {error && (
+              <p className="text-[12px] text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-md">
+                {error}
+              </p>
+            )}
+
+            <button
               type="submit"
-              className="w-full bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-lg h-11 cursor-pointer transition-colors duration-150"
               disabled={loading}
+              className="w-full flex items-center justify-center gap-2 text-sm font-semibold bg-zinc-900 text-white h-9 rounded-md hover:bg-zinc-800 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed mt-2"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   Wird registriert...
                 </>
               ) : (
                 "Kostenlos registrieren"
               )}
-            </Button>
+            </button>
+
+            <p className="text-[11px] text-zinc-400 text-center leading-relaxed">
+              Mit der Registrierung akzeptierst du unsere{" "}
+              <a href="#" className="underline underline-offset-2 hover:text-zinc-600">AGB</a>{" "}
+              und{" "}
+              <a href="#" className="underline underline-offset-2 hover:text-zinc-600">Datenschutzrichtlinien</a>.
+            </p>
           </form>
-          <p className="mt-6 text-center text-sm text-gray-500">
-            Bereits ein Konto?{" "}
-            <Link
-              href="/auth/login"
-              className="text-[#3B82F6] hover:underline cursor-pointer"
-            >
-              Anmelden
-            </Link>
-          </p>
         </div>
       </div>
     </div>

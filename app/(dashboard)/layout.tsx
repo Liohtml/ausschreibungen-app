@@ -31,32 +31,33 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-[#F8FAFC]">
+    <div className="flex min-h-screen bg-zinc-50">
       {/* Sidebar */}
-      <aside className="w-[260px] bg-white border-r border-gray-100/80 flex flex-col shrink-0">
-        <div className="px-6 h-16 flex items-center border-b border-gray-100/80">
+      <aside className="w-[220px] bg-white border-r border-zinc-200 flex flex-col shrink-0">
+        <div className="px-5 h-[60px] flex items-center border-b border-zinc-200">
           <Link
             href="/dashboard"
-            className="text-lg font-heading font-semibold text-[#1E293B] tracking-tight"
+            className="text-sm font-bold text-zinc-900 tracking-tight"
           >
-            ausschreibungen
-            <span className="text-[#3B82F6]">.de</span>
+            Ausschreibungen.de
           </Link>
         </div>
-        <nav className="flex-1 px-3 pt-4 space-y-0.5">
+
+        <nav className="flex-1 px-3 pt-3 space-y-0.5">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-500 hover:text-[#1E293B] hover:bg-gray-50 transition-all duration-200 cursor-pointer"
+              className="flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors duration-150"
             >
-              <item.icon className="w-[18px] h-[18px]" />
+              <item.icon className="w-4 h-4 shrink-0" strokeWidth={1.75} />
               {item.label}
             </Link>
           ))}
         </nav>
-        <div className="px-4 py-4 border-t border-gray-100/80 mx-2">
-          <p className="text-xs text-gray-400 truncate mb-3 px-1">
+
+        <div className="px-3 py-4 border-t border-zinc-100">
+          <p className="text-[11px] font-mono text-zinc-400 truncate px-3 mb-2">
             {user.email}
           </p>
           <LogoutButton />
@@ -64,8 +65,8 @@ export default async function DashboardLayout({
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 p-8 lg:p-10 overflow-auto">
-        <div className="max-w-6xl">{children}</div>
+      <main className="flex-1 overflow-auto">
+        <div className="max-w-5xl mx-auto px-8 py-10">{children}</div>
       </main>
     </div>
   );

@@ -4,11 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase/client";
 import type { Ausschreibung } from "@/lib/types";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
-import { Bookmark, Loader2, ChevronRight, Trash2 } from "lucide-react";
+import { Loader2, Trash2, Bookmark } from "lucide-react";
 
 interface MerklisteItem {
   id: string;
@@ -32,9 +30,7 @@ export default function MerklistePage() {
     setLoading(false);
   };
 
-  useEffect(() => {
-    fetchMerkliste();
-  }, []);
+  useEffect(() => { fetchMerkliste(); }, []);
 
   const handleDelete = async (id: string) => {
     const supabase = createBrowserSupabase();
@@ -44,88 +40,72 @@ export default function MerklistePage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-heading font-bold text-[#1E293B]">
+      <div className="mb-6">
+        <h1 className="text-[22px] font-black text-zinc-950 tracking-tight leading-none">
           Merkliste
         </h1>
-        <p className="text-sm text-gray-400 mt-1">
-          Ihre gespeicherten Ausschreibungen.
+        <p className="text-[13px] text-zinc-400 mt-1.5">
+          Gespeicherte Ausschreibungen.
         </p>
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20 text-gray-400">
-          <Loader2 className="w-5 h-5 animate-spin mr-2" />
-          Laden...
+        <div className="flex items-center justify-center py-20 text-zinc-400">
+          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          <span className="text-[13px]">Laden...</span>
         </div>
       ) : items.length === 0 ? (
-        <div className="bg-white border border-gray-100/80 rounded-2xl p-12 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center mx-auto mb-4">
-            <Bookmark className="w-7 h-7 text-gray-300" />
-          </div>
-          <p className="text-gray-500 font-medium mb-1">
-            Ihre Merkliste ist leer.
+        <div className="border border-zinc-200 rounded-lg p-12 text-center bg-white">
+          <Bookmark className="w-5 h-5 text-zinc-300 mx-auto mb-3" />
+          <p className="text-[13px] text-zinc-500 font-medium mb-1">
+            Merkliste ist leer.
           </p>
-          <p className="text-sm text-gray-400">
-            Speichern Sie Ausschreibungen, um sie hier wiederzufinden.
+          <p className="text-[12px] text-zinc-400">
+            Speichere Ausschreibungen, um sie hier wiederzufinden.
           </p>
         </div>
       ) : (
-        <div className="bg-white border border-gray-100/80 rounded-2xl divide-y divide-gray-50 overflow-hidden">
-          {items.map((entry) => {
+        <div className="border border-zinc-200 rounded-lg overflow-hidden bg-white">
+          {/* Head */}
+          <div className="grid grid-cols-[1fr_160px_40px] gap-4 px-6 py-2.5 border-b border-zinc-100 bg-zinc-50/80">
+            <span className="text-[9px] font-mono font-medium uppercase tracking-[0.14em] text-zinc-400">Titel</span>
+            <span className="text-[9px] font-mono font-medium uppercase tracking-[0.14em] text-zinc-400">Abgabe</span>
+            <span></span>
+          </div>
+          {items.map((entry, i) => {
             const item = entry.ausschreibungen;
             if (!item) return null;
             return (
               <div
                 key={entry.id}
-                className="px-6 py-4 hover:bg-gray-50/50 transition-colors duration-200 flex items-center gap-4"
+                className={`grid grid-cols-[1fr_160px_40px] gap-4 px-6 py-3.5 items-center ${i < items.length - 1 ? "border-b border-zinc-50" : ""} hover:bg-zinc-50/80 transition-colors duration-100`}
               >
                 <div
-                  className="min-w-0 flex-1 cursor-pointer"
-                  onClick={() =>
-                    router.push(
-                      `/ausschreibungen/${entry.ausschreibung_id}`
-                    )
-                  }
+                  className="min-w-0 cursor-pointer"
+                  onClick={() => router.push(`/ausschreibungen/${entry.ausschreibung_id}`)}
                 >
-                  <p className="font-medium text-[#1E293B] text-sm">
+                  <p className="text-[13px] font-semibold text-zinc-900 truncate tracking-tight">
                     {item.titel}
                   </p>
-                  <p className="text-sm text-gray-400 mt-1">
-                    {item.auftraggeber_name}
-                    {item.auftraggeber_ort
-                      ? ` — ${item.auftraggeber_ort}`
-                      : ""}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  {item.abgabefrist && (
-                    <Badge
-                      variant="outline"
-                      className="rounded-full text-xs text-gray-400 border-gray-200"
-                    >
-                      {format(new Date(item.abgabefrist), "dd.MM.yyyy", {
-                        locale: de,
-                      })}
-                    </Badge>
+                  {item.auftraggeber_name && (
+                    <p className="text-[11px] text-zinc-400 mt-0.5 truncate">
+                      {item.auftraggeber_name}
+                      {item.auftraggeber_ort ? ` · ${item.auftraggeber_ort}` : ""}
+                    </p>
                   )}
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => handleDelete(entry.id)}
-                    className="text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl cursor-pointer transition-all duration-200"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                  <ChevronRight
-                    className="w-4 h-4 text-gray-300 cursor-pointer"
-                    onClick={() =>
-                      router.push(
-                        `/ausschreibungen/${entry.ausschreibung_id}`
-                      )
-                    }
-                  />
                 </div>
+                <p className="text-[11px] font-mono text-zinc-400">
+                  {item.abgabefrist
+                    ? format(new Date(item.abgabefrist), "dd.MM.yyyy", { locale: de })
+                    : "-"}
+                </p>
+                <button
+                  onClick={() => handleDelete(entry.id)}
+                  className="p-1.5 rounded text-zinc-300 hover:text-red-500 hover:bg-red-50 transition-colors duration-150"
+                  title="Entfernen"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
               </div>
             );
           })}
