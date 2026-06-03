@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, type Variants, type Easing } from "framer-motion";
 import { AnimatedRoadmap } from "@/components/hero-section-5";
 import { ArrowRight, Check } from "lucide-react";
 
@@ -143,7 +143,9 @@ function ScorePill({ score }: { score: number }) {
   );
 }
 
-const fadeUp = {
+const EASE: Easing = [0.16, 1, 0.3, 1];
+
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 16 },
   visible: (i: number) => ({
     opacity: 1,
@@ -151,7 +153,7 @@ const fadeUp = {
     transition: {
       delay: i * 0.06,
       duration: 0.6,
-      ease: [0.16, 1, 0.3, 1],
+      ease: EASE,
     },
   }),
 };
@@ -302,7 +304,7 @@ export default function LandingPage() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.8, delay: 0.3, ease: EASE }}
           className="hidden lg:flex flex-col overflow-hidden bg-white"
         >
           {/* Product header */}
