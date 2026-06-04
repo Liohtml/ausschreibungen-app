@@ -182,6 +182,7 @@ export default function EinstellungenPage() {
                   return (
                     <label
                       key={bl}
+                      onClick={() => toggleBundesland(bl)}
                       className={`flex items-center gap-2.5 text-[12px] cursor-pointer py-2 px-3 rounded-md transition-colors duration-100 ${
                         active
                           ? "bg-zinc-900 text-white"
