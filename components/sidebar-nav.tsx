@@ -15,6 +15,7 @@ import { LogoutButton } from "@/components/logout-button";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
@@ -105,11 +106,15 @@ export function SidebarNav({ userEmail }: { userEmail?: string }) {
 
           <SheetContent
             side="left"
+            showCloseButton={false}
             className="w-[260px] bg-white p-0 flex flex-col"
           >
             <SheetTitle className="px-5 h-[60px] flex items-center border-b border-zinc-200 text-sm font-bold text-zinc-900 tracking-tight">
               Ausschreibungen.de
             </SheetTitle>
+            <SheetDescription className="sr-only">
+              Hauptnavigation
+            </SheetDescription>
 
             <nav className="flex-1 px-3 pt-3 space-y-0.5">
               <NavLinks onNavigate={() => setOpen(false)} />

@@ -64,10 +64,10 @@ export default function AusschreibungenPage() {
       .select("*", { count: "exact" });
 
     if (search.trim()) {
-      query = query.textSearch("titel", search.trim(), {
-        type: "websearch",
-        config: "german",
-      });
+      // ilike works on a plain text column; escape LIKE wildcards so the
+      // user's input is matched literally.
+      const term = search.trim().replace(/[\\%_]/g, "\\$&");
+      query = query.ilike("titel", `%${term}%`);
     }
     if (bundesland !== "all") query = query.eq("auftraggeber_bundesland", bundesland);
     if (auftragsart !== "all") query = query.eq("auftragsart", auftragsart);
@@ -80,7 +80,7 @@ export default function AusschreibungenPage() {
 
     if (error) {
       console.error(error);
-      setError(error.message);
+      setError("Die Ausschreibungen konnten nicht geladen werden. Bitte versuche es erneut.");
       setResults([]);
       setTotalCount(0);
       setLoading(false);
@@ -153,9 +153,11 @@ export default function AusschreibungenPage() {
       </div>
 
       {/* Count */}
-      <p className="text-[11px] font-mono text-zinc-400 mb-3">
-        {totalCount} Ergebnis{totalCount !== 1 ? "se" : ""}
-      </p>
+      {!error && (
+        <p className="text-[11px] font-mono text-zinc-400 mb-3">
+          {totalCount} Ergebnis{totalCount !== 1 ? "se" : ""}
+        </p>
+      )}
 
       {/* Results */}
       {loading ? (

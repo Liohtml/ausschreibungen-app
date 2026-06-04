@@ -31,19 +31,21 @@ export function MerkenButton({
           return;
         }
 
+        // limit(1) instead of maybeSingle(): tolerant of any pre-existing
+        // duplicate rows (maybeSingle throws when more than one row matches).
         const { data, error } = await supabase
           .from("user_merkliste")
           .select("id")
           .eq("ausschreibung_id", ausschreibungId)
           .eq("user_id", user.id)
-          .maybeSingle();
+          .limit(1);
 
         if (error) {
           console.error(error);
           return;
         }
 
-        if (active) setSaved(!!data);
+        if (active) setSaved((data?.length ?? 0) > 0);
       } finally {
         if (active) setInitializing(false);
       }
