@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase/client";
 import type { UserProfile } from "@/lib/types";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ const BUNDESLAENDER = [
 ];
 
 export default function EinstellungenPage() {
+  const router = useRouter();
   const [profile, setProfile] = useState<Partial<UserProfile>>({});
   const [keywordsText, setKeywordsText] = useState("");
   const [beschreibung, setBeschreibung] = useState("");
@@ -26,53 +28,65 @@ export default function EinstellungenPage() {
 
   useEffect(() => {
     const load = async () => {
-      const supabase = createBrowserSupabase();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      try {
+        const supabase = createBrowserSupabase();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          router.push("/auth/login");
+          return;
+        }
 
-      const { data } = await supabase
-        .from("user_profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
+        const { data } = await supabase
+          .from("user_profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
 
-      if (data) {
-        const p = data as UserProfile;
-        setProfile(p);
-        setKeywordsText(p.keywords?.join(", ") ?? "");
-        setBeschreibung(p.beschreibung ?? "");
-        setSelectedBundeslaender(p.bundeslaender ?? []);
+        if (data) {
+          const p = data as UserProfile;
+          setProfile(p);
+          setKeywordsText(p.keywords?.join(", ") ?? "");
+          setBeschreibung(p.beschreibung ?? "");
+          setSelectedBundeslaender(p.bundeslaender ?? []);
+        }
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     load();
-  }, []);
+  }, [router]);
 
   const handleSave = async () => {
     setSaving(true);
     setMessage(null);
 
-    const supabase = createBrowserSupabase();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    try {
+      const supabase = createBrowserSupabase();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push("/auth/login");
+        return;
+      }
 
-    const keywords = keywordsText.split(",").map((k) => k.trim()).filter(Boolean);
+      const keywords = keywordsText.split(",").map((k) => k.trim()).filter(Boolean);
 
-    const { error } = await supabase.from("user_profiles").upsert({
-      id: user.id,
-      firmenname: profile.firmenname ?? null,
-      beschreibung: beschreibung || null,
-      keywords,
-      bundeslaender: selectedBundeslaender,
-      plz: profile.plz ?? null,
-      radius_km: profile.radius_km ?? null,
-    });
+      const { error } = await supabase.from("user_profiles").upsert({
+        id: user.id,
+        firmenname: profile.firmenname ?? null,
+        beschreibung: beschreibung || null,
+        keywords,
+        bundeslaender: selectedBundeslaender,
+        plz: profile.plz ?? null,
+        radius_km: profile.radius_km ?? null,
+      });
 
-    setMessage(error
-      ? { text: "Fehler: " + error.message, error: true }
-      : { text: "Einstellungen gespeichert.", error: false }
-    );
-    setSaving(false);
+      setMessage(error
+        ? { text: "Fehler: " + error.message, error: true }
+        : { text: "Einstellungen gespeichert.", error: false }
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   const toggleBundesland = (bl: string) => {

@@ -47,14 +47,16 @@ export default function AusschreibungenPage() {
   const router = useRouter();
   const [results, setResults] = useState<Ausschreibung[]>([]);
   const [search, setSearch] = useState("");
-  const [bundesland, setBundesland] = useState<string>("");
-  const [auftragsart, setAuftragsart] = useState<string>("");
+  const [bundesland, setBundesland] = useState<string>("all");
+  const [auftragsart, setAuftragsart] = useState<string>("all");
   const [page, setPage] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    setError(null);
     const supabase = createBrowserSupabase();
 
     let query = supabase
@@ -67,14 +69,24 @@ export default function AusschreibungenPage() {
         config: "german",
       });
     }
-    if (bundesland) query = query.eq("auftraggeber_bundesland", bundesland);
-    if (auftragsart) query = query.eq("auftragsart", auftragsart);
+    if (bundesland !== "all") query = query.eq("auftraggeber_bundesland", bundesland);
+    if (auftragsart !== "all") query = query.eq("auftragsart", auftragsart);
 
     query = query
       .order("created_at", { ascending: false })
       .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
 
-    const { data, count } = await query;
+    const { data, count, error } = await query;
+
+    if (error) {
+      console.error(error);
+      setError(error.message);
+      setResults([]);
+      setTotalCount(0);
+      setLoading(false);
+      return;
+    }
+
     setResults((data as Ausschreibung[]) ?? []);
     setTotalCount(count ?? 0);
     setLoading(false);
@@ -112,7 +124,7 @@ export default function AusschreibungenPage() {
         </div>
         <Select
           value={bundesland}
-          onValueChange={(val) => { setBundesland(!val || val === "all" ? "" : val); setPage(0); }}
+          onValueChange={(val) => { setBundesland(val ?? "all"); setPage(0); }}
         >
           <SelectTrigger className="md:w-48 h-9 text-[13px] border-zinc-200 bg-white rounded-md">
             <SelectValue placeholder="Bundesland" />
@@ -126,7 +138,7 @@ export default function AusschreibungenPage() {
         </Select>
         <Select
           value={auftragsart}
-          onValueChange={(val) => { setAuftragsart(!val || val === "all" ? "" : val); setPage(0); }}
+          onValueChange={(val) => { setAuftragsart(val ?? "all"); setPage(0); }}
         >
           <SelectTrigger className="md:w-48 h-9 text-[13px] border-zinc-200 bg-white rounded-md">
             <SelectValue placeholder="Auftragsart" />
@@ -150,6 +162,10 @@ export default function AusschreibungenPage() {
         <div className="flex items-center justify-center py-20 text-zinc-400">
           <Loader2 className="w-4 h-4 animate-spin mr-2" />
           <span className="text-[13px]">Laden...</span>
+        </div>
+      ) : error ? (
+        <div className="text-red-600 bg-red-50 border border-red-200 rounded-md px-4 py-2.5 text-[13px]">
+          {error}
         </div>
       ) : results.length === 0 ? (
         <div className="border border-zinc-200 rounded-lg p-10 text-center bg-white">

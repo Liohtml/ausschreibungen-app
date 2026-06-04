@@ -14,6 +14,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [confirmEmailSent, setConfirmEmailSent] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +22,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     const supabase = createBrowserSupabase();
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -31,6 +32,11 @@ export default function RegisterPage() {
 
     if (error) {
       setError(error.message);
+      setLoading(false);
+    } else if (!data.session) {
+      // Email confirmation is required: no session yet.
+      // Show a confirmation panel instead of redirecting.
+      setConfirmEmailSent(true);
       setLoading(false);
     } else {
       router.push("/dashboard");
@@ -52,6 +58,33 @@ export default function RegisterPage() {
       {/* Form */}
       <div className="flex-1 flex items-center justify-center px-4 py-16">
         <div className="w-full max-w-[360px]">
+          {confirmEmailSent ? (
+            <>
+              <div className="mb-8">
+                <h1 className="text-[28px] font-black text-zinc-950 tracking-tight leading-none mb-2">
+                  Fast geschafft
+                </h1>
+                <p className="text-[13px] text-zinc-400">
+                  Wir haben dir eine Bestätigungs-E-Mail an{" "}
+                  <span className="text-zinc-700 font-medium">{email}</span>{" "}
+                  geschickt. Bitte bestätige deine Adresse, um fortzufahren.
+                </p>
+              </div>
+
+              <div className="text-[13px] text-zinc-600 bg-white border border-zinc-200 px-3 py-3 rounded-md leading-relaxed">
+                Keine E-Mail erhalten? Sieh in deinem Spam-Ordner nach oder
+                versuche es in wenigen Minuten erneut.
+              </div>
+
+              <Link
+                href="/auth/login"
+                className="w-full flex items-center justify-center gap-2 text-sm font-semibold bg-zinc-900 text-white h-9 rounded-md hover:bg-zinc-800 transition-colors duration-150 mt-4"
+              >
+                Zur Anmeldung
+              </Link>
+            </>
+          ) : (
+          <>
           <div className="mb-8">
             <h1 className="text-[28px] font-black text-zinc-950 tracking-tight leading-none mb-2">
               Konto erstellen
@@ -123,6 +156,8 @@ export default function RegisterPage() {
               <a href="#" className="underline underline-offset-2 hover:text-zinc-600">Datenschutzrichtlinien</a>.
             </p>
           </form>
+          </>
+          )}
         </div>
       </div>
     </div>
