@@ -39,5 +39,9 @@ describe("safeRedirectPath", () => {
     expect(safeRedirectPath("/foo\r\nSet-Cookie: x=1")).toBe("/dashboard");
     expect(safeRedirectPath("/foo\nbar")).toBe("/dashboard");
     expect(safeRedirectPath("/foo\x00bar")).toBe("/dashboard");
+    expect(safeRedirectPath("/foo\tbar")).toBe("/dashboard");
+    expect(safeRedirectPath("/foo\u0085bar")).toBe("/dashboard");
+    expect(safeRedirectPath("/foo\u2028bar")).toBe("/dashboard");
+    expect(safeRedirectPath("/foo\u2029bar")).toBe("/dashboard");
   });
 });

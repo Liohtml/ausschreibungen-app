@@ -19,8 +19,9 @@ export function safeRedirectPath(next: string | null | undefined): string {
   if (next.startsWith("//")) return fallback;
   // … nor a backslash variant the browser rewrites to `//` (e.g. `/\evil.com`) …
   if (next.includes("\\")) return fallback;
-  // … nor carrying control chars / CRLF for header injection.
-  if (/[\x00-\x1f\x7f]/.test(next)) return fallback;
+  // … nor carrying control chars / CRLF / Unicode line terminators that some
+  // HTTP stacks treat as header field separators (header injection).
+  if (/[\x00-\x1f\x7f\u0085\u2028\u2029]/.test(next)) return fallback;
 
   return next;
 }
