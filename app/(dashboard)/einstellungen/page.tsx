@@ -180,9 +180,13 @@ export default function EinstellungenPage() {
                 {BUNDESLAENDER.map((bl) => {
                   const active = selectedBundeslaender.includes(bl);
                   return (
-                    <label
+                    <button
                       key={bl}
-                      className={`flex items-center gap-2.5 text-[12px] cursor-pointer py-2 px-3 rounded-md transition-colors duration-100 ${
+                      type="button"
+                      role="checkbox"
+                      aria-checked={active}
+                      onClick={() => toggleBundesland(bl)}
+                      className={`flex items-center gap-2.5 text-[12px] cursor-pointer py-2 px-3 rounded-md transition-colors duration-100 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-900 ${
                         active
                           ? "bg-zinc-900 text-white"
                           : "text-zinc-600 hover:bg-zinc-50"
@@ -194,7 +198,7 @@ export default function EinstellungenPage() {
                         {active && <Check className="w-2.5 h-2.5 text-zinc-900" />}
                       </div>
                       {bl}
-                    </label>
+                    </button>
                   );
                 })}
               </div>

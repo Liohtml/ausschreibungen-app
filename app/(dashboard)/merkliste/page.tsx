@@ -19,18 +19,32 @@ export default function MerklistePage() {
   const [items, setItems] = useState<MerklisteItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchMerkliste = async () => {
-    const supabase = createBrowserSupabase();
-    const { data } = await supabase
-      .from("user_merkliste")
-      .select("id, ausschreibung_id, ausschreibungen(*)")
-      .order("created_at", { ascending: false });
+  useEffect(() => {
+    let active = true;
 
-    setItems((data as unknown as MerklisteItem[]) ?? []);
-    setLoading(false);
-  };
+    const fetchMerkliste = async () => {
+      const supabase = createBrowserSupabase();
+      const { data, error } = await supabase
+        .from("user_merkliste")
+        .select("id, ausschreibung_id, ausschreibungen(*)")
+        .order("created_at", { ascending: false });
 
-  useEffect(() => { fetchMerkliste(); }, []);
+      if (!active) return;
+      if (error) {
+        console.error(error);
+        setLoading(false);
+        return;
+      }
+      setItems((data as unknown as MerklisteItem[]) ?? []);
+      setLoading(false);
+    };
+
+    fetchMerkliste();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleDelete = async (id: string) => {
     const supabase = createBrowserSupabase();
