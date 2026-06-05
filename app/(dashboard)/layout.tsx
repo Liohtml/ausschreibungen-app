@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { SidebarNav } from "@/components/sidebar-nav";
+import { SubscriptionBanner } from "@/components/subscription-banner";
+import { getSubscriptionInfo } from "@/lib/subscription";
 
 export default async function DashboardLayout({
   children,
@@ -16,6 +18,18 @@ export default async function DashboardLayout({
     redirect("/auth/login");
   }
 
+  const { data: profile, error: profileError } = await supabase
+    .from("user_profiles")
+    .select("abo_status, abo_gueltig_bis")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profileError) {
+    console.error("[DashboardLayout] Profil-Fetch fehlgeschlagen:", profileError.message);
+  }
+
+  const { state, daysLeft } = getSubscriptionInfo(profile);
+
   return (
     <div className="flex min-h-screen flex-col md:flex-row bg-zinc-50">
       {/* Sidebar (desktop) + top bar (mobile) */}
@@ -23,6 +37,8 @@ export default async function DashboardLayout({
 
       {/* Main content */}
       <main className="flex-1 overflow-auto">
+        {/* Soft subscription nudge — informational only, never blocks access */}
+        <SubscriptionBanner state={state} daysLeft={daysLeft} />
         <div className="max-w-5xl mx-auto px-8 py-10">{children}</div>
       </main>
     </div>
