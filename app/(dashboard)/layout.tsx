@@ -18,11 +18,15 @@ export default async function DashboardLayout({
     redirect("/auth/login");
   }
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("user_profiles")
     .select("abo_status, abo_gueltig_bis")
     .eq("id", user.id)
     .maybeSingle();
+
+  if (profileError) {
+    console.error("[DashboardLayout] Profil-Fetch fehlgeschlagen:", profileError.message);
+  }
 
   const { state, daysLeft } = getSubscriptionInfo(profile);
 

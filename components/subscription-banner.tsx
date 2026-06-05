@@ -18,7 +18,9 @@ export function SubscriptionBanner({
 }) {
   const [dismissed, setDismissed] = useState(false);
 
-  if (dismissed || state === "active") return null;
+  // Only nudge users whose status is actually set to trial or expired.
+  // "active" needs no banner; "none" (status not set) must not nag everyone.
+  if (dismissed || state === "active" || state === "none") return null;
 
   const isTrial = state === "trialing";
 
@@ -34,17 +36,13 @@ export function SubscriptionBanner({
         {isTrial ? (
           <>
             <span className="font-medium">Testphase aktiv</span>
-            {typeof daysLeft === "number" && (
+            {typeof daysLeft === "number" && daysLeft > 0 && (
               <> — noch {daysLeft} Tag{daysLeft === 1 ? "" : "e"}.</>
             )}
           </>
         ) : (
           <>
-            <span className="font-medium">
-              {state === "expired"
-                ? "Dein Zugang ist abgelaufen."
-                : "Kein aktives Abo."}
-            </span>{" "}
+            <span className="font-medium">Dein Zugang ist abgelaufen.</span>{" "}
             Schalte alle Funktionen frei.
           </>
         )}

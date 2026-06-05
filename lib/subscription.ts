@@ -14,6 +14,25 @@ const DAY_MS = 1000 * 60 * 60 * 24;
 type ProfileLike = Pick<UserProfile, "abo_status" | "abo_gueltig_bis"> | null | undefined;
 
 /**
+ * Parse `abo_gueltig_bis` robustly. A Postgres `timestamp` (without time zone)
+ * serializes with no offset and would otherwise be read as *local* time, which
+ * shifts the expiry boundary off UTC on non-UTC machines. Force UTC for datetime
+ * values that carry no offset; date-only strings are already UTC midnight per spec.
+ */
+function parseValidUntil(value: string | null | undefined): Date | null {
+  if (!value) return null;
+  const hasTime = value.includes("T") || value.includes(" ");
+  const hasTz = /[zZ]$/.test(value) || /[+-]\d{2}:?\d{2}$/.test(value);
+  let iso = value;
+  if (hasTime) {
+    iso = value.replace(" ", "T");
+    if (!hasTz) iso += "Z";
+  }
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/**
  * Derive the subscription state from a user profile.
  *
  * Pure and deterministic — `now` is injectable for testing. This is the
@@ -25,12 +44,10 @@ export function getSubscriptionInfo(
   profile: ProfileLike,
   now: Date = new Date()
 ): SubscriptionInfo {
-  const validUntil = profile?.abo_gueltig_bis
-    ? new Date(profile.abo_gueltig_bis)
-    : null;
+  const validUntil = parseValidUntil(profile?.abo_gueltig_bis);
 
   const status = (profile?.abo_status ?? "").trim().toLowerCase();
-  const hasValidUntil = validUntil !== null && !Number.isNaN(validUntil.getTime());
+  const hasValidUntil = validUntil !== null;
   const expired = hasValidUntil && validUntil.getTime() < now.getTime();
 
   let state: SubscriptionState;
@@ -53,7 +70,7 @@ export function getSubscriptionInfo(
     ? Math.max(0, Math.ceil((validUntil.getTime() - now.getTime()) / DAY_MS))
     : null;
 
-  return { state, validUntil: hasValidUntil ? validUntil : null, daysLeft };
+  return { state, validUntil, daysLeft };
 }
 
 /**

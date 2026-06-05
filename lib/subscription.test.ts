@@ -34,6 +34,21 @@ describe("getSubscriptionInfo", () => {
     expect(getSubscriptionInfo({ abo_status: "inactive", abo_gueltig_bis: null }, NOW).state).toBe("expired");
   });
 
+  it("explicit expired/cancelled status overrides a future end date", () => {
+    expect(getSubscriptionInfo({ abo_status: "expired", abo_gueltig_bis: future }, NOW).state).toBe("expired");
+    expect(getSubscriptionInfo({ abo_status: "cancelled", abo_gueltig_bis: future }, NOW).state).toBe("expired");
+  });
+
+  it("parses a Postgres timestamp-without-timezone as UTC", () => {
+    // No offset → must be read as UTC, not local time.
+    const info = getSubscriptionInfo(
+      { abo_status: "active", abo_gueltig_bis: "2026-06-20 12:00:00" },
+      NOW
+    );
+    expect(info.state).toBe("active");
+    expect(info.daysLeft).toBe(15);
+  });
+
   it("is case-insensitive and trims status", () => {
     expect(getSubscriptionInfo({ abo_status: "  Active ", abo_gueltig_bis: future }, NOW).state).toBe("active");
   });
